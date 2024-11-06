@@ -1,22 +1,27 @@
-﻿using Swimming_Pool_One_Lab.Models;
-using Swimming_Pool_One_Lab.ViewModels;
+﻿using Swimming_Pool_Second_Lab.Models;
+using Swimming_Pool_Second_Lab.ViewModels;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
-namespace Swimming_Pool_One_Lab;
+namespace Swimming_Pool_Second_Lab.Views;
 
 public partial class MainWindow : Window
 {
     private static MainWindowViewModel mainWindowViewModel = new();
 
     public static MainWindowViewModel MainWindowViewModel { get => mainWindowViewModel; set => mainWindowViewModel = value; }
+    public static MainWindow? MainWindowInstance { get => mainWindow; set => mainWindow = value; }
+
+    private static MainWindow? mainWindow;
 
     public MainWindow()
     {
         Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
         DataContext = MainWindowViewModel;
         InitializeComponent();
+        MainWindowInstance = this;
     }
 
     private async void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -51,7 +56,7 @@ public partial class MainWindow : Window
                             tb.Text = client.Age.ToString();
                         }
                         break;
-                    case "FirstName":
+                    case "First Name":
                         if (!string.IsNullOrWhiteSpace(valueNew))
                         {
                             client.FirstName = valueNew;
@@ -62,7 +67,7 @@ public partial class MainWindow : Window
                             tb.Text = client.FirstName;
                         }
                         break;
-                    case "LastName":
+                    case "Last Name":
                         if (!string.IsNullOrWhiteSpace(valueNew))
                         {
                             client.LastName = valueNew;
@@ -73,7 +78,7 @@ public partial class MainWindow : Window
                             tb.Text = client.LastName;
                         }
                         break;
-                    case "PhoneNumber":
+                    case "Phone Number":
                         if (!string.IsNullOrWhiteSpace(valueNew))
                         {
                             client.PhoneNumber = valueNew;
@@ -84,7 +89,7 @@ public partial class MainWindow : Window
                             tb.Text = client.PhoneNumber;
                         }
                         break;
-                    case "EmailAddress":
+                    case "Email Address":
                         if (!string.IsNullOrWhiteSpace(valueNew))
                         {
                             client.EmailAddress = valueNew;
@@ -100,9 +105,9 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void DataGridClient_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    private async void DataGridClient_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == System.Windows.Input.Key.Delete)
+        if (e.Key == Key.Delete)
         {
             if (sender is DataGrid dataGrid)
             {
@@ -118,16 +123,22 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void MenuItemClient_Click(object sender, RoutedEventArgs e)
+    private void MenuItemClient_Click(object sender, RoutedEventArgs e)
     {
-        await Database.CreateClient("EditName", "EditLastName", 0, "+380", "edit.mail@gmail.com");
-        MainWindowViewModel.Clients = await Database.GetAllClients();
+        CreateClientWindow createClientWindow = new()
+        {
+            Owner = this
+        };
+        createClientWindow.ShowDialog();
     }
 
-    private async void MenuItemTraining_Click(object sender, RoutedEventArgs e)
+    private void MenuItemTraining_Click(object sender, RoutedEventArgs e)
     {
-        await Database.CreateTraining(DateTime.Now, "< Training Type >", "< Pool Name >");
-        MainWindowViewModel.Trainings = await Database.GetAllTrainings();
+        CreateTrainingWindow createTrainingWindow = new()
+        {
+            Owner = this
+        };
+        createTrainingWindow.ShowDialog();
     }
 
     private async void DataGridTraining_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
@@ -159,7 +170,7 @@ public partial class MainWindow : Window
                             tb.Text = training.Date.ToString("yyyy-MM-dd HH:mm");
                         }
                         break;
-                    case "TrainingType":
+                    case "Training Type":
                         if (!string.IsNullOrWhiteSpace(valueNew))
                         {
                             training.TrainingType = valueNew;
@@ -170,7 +181,7 @@ public partial class MainWindow : Window
                             tb.Text = training.TrainingType;
                         }
                         break;
-                    case "PoolName":
+                    case "Pool Name":
                         if (!string.IsNullOrWhiteSpace(valueNew))
                         {
                             training.PoolName = valueNew;
@@ -186,9 +197,9 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void DataGridTraining_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    private async void DataGridTraining_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == System.Windows.Input.Key.Delete)
+        if (e.Key == Key.Delete)
         {
             if (sender is DataGrid dataGrid)
             {
@@ -238,9 +249,9 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void DataGridInstructor_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    private async void DataGridInstructor_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == System.Windows.Input.Key.Delete)
+        if (e.Key == Key.Delete)
         {
             if (sender is DataGrid dataGrid)
             {
@@ -278,7 +289,7 @@ public partial class MainWindow : Window
                             tb.Text = instructor.Age.ToString();
                         }
                         break;
-                    case "FirstName":
+                    case "First Name":
                         if (!string.IsNullOrWhiteSpace(valueNew))
                         {
                             instructor.FirstName = valueNew;
@@ -289,7 +300,7 @@ public partial class MainWindow : Window
                             tb.Text = instructor.FirstName;
                         }
                         break;
-                    case "LastName":
+                    case "Last Name":
                         if (!string.IsNullOrWhiteSpace(valueNew))
                         {
                             instructor.LastName = valueNew;
@@ -300,7 +311,7 @@ public partial class MainWindow : Window
                             tb.Text = instructor.LastName;
                         }
                         break;
-                    case "PhoneNumber":
+                    case "Phone Number":
                         if (!string.IsNullOrWhiteSpace(valueNew))
                         {
                             instructor.PhoneNumber = valueNew;
@@ -311,7 +322,7 @@ public partial class MainWindow : Window
                             tb.Text = instructor.PhoneNumber;
                         }
                         break;
-                    case "EmailAddress":
+                    case "Email Address":
                         if (!string.IsNullOrWhiteSpace(valueNew))
                         {
                             instructor.EmailAddress = valueNew;
@@ -338,9 +349,51 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void MenuItemInstructor_Click(object sender, RoutedEventArgs e)
+    private void MenuItemInstructor_Click(object sender, RoutedEventArgs e)
     {
-        await Database.CreateInstructor("EditName", "EditLastName", 0, "+380", "edit.mail@gmail.com", "< edit specialization >");
-        MainWindowViewModel.Instructors = await Database.GetAllInstructors();
+        CreateInstructorWindow createInstructorWindow = new()
+        {
+            Owner = this
+        };
+        createInstructorWindow.ShowDialog();
+    }
+
+    private void MenuItemApp_Click(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
+
+    private void MenuItemAppQueryEditor_Click(object sender, RoutedEventArgs e)
+    {
+        TabControlView.Visibility = Visibility.Collapsed;
+        QueryEditorGrid.Visibility = Visibility.Visible;
+        MenuItemQueryEditor.IsEnabled = false;
+        ClearSQLBox_Click(sender, e);
+        ExecuteSQLButton_Click(sender, e);
+    }
+
+    private async void ExecuteSQLButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            string sqlQuery = SQLQueryTextBox.Text;
+            IEnumerable<dynamic> result = await Database.ExecuteQuery(sqlQuery);
+            QueryResultDataGrid.Columns.Clear();
+            QueryResultDataGrid.ItemsSource = result;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Error in Query Editor!", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void ClearSQLBox_Click(object sender, RoutedEventArgs e)
+    {
+        SQLQueryTextBox.Text = "SELECT * FROM client";
+        ExecuteSQLButton_Click(sender, e);
+    }
+
+    private void ExitQueryEditor_Click(object sender, RoutedEventArgs e)
+    {
+        MenuItemQueryEditor.IsEnabled = true;
+        TabControlView.Visibility = Visibility.Visible;
+        QueryEditorGrid.Visibility = Visibility.Collapsed;
     }
 }

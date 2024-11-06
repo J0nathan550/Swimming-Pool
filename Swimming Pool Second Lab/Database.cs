@@ -1,9 +1,9 @@
 ﻿using Dapper;
 using MySqlConnector;
-using Swimming_Pool_One_Lab.Models;
+using Swimming_Pool_Second_Lab.Models;
 using System.Collections.ObjectModel;
 
-namespace Swimming_Pool_One_Lab;
+namespace Swimming_Pool_Second_Lab;
 
 public static class Database
 {
@@ -45,22 +45,29 @@ public static class Database
         await connection.ExecuteAsync(sql, new { ClientId = clientId, FirstName = firstName, LastName = lastName, Age = age, PhoneNumber = phoneNumber, EmailAddress = emailAddress });
     }
 
+    public static async Task<Client?> GetClientById(int clientId)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT * FROM client WHERE client_id = @ClientId;";
+        Client? client = await connection.QueryFirstOrDefaultAsync<Client>(sql, new { ClientId = clientId });
+        return client;
+    }
+
     #endregion
 
     #region Training Queries
 
-    public static async Task CreateTraining(DateTime date, string training_type, string pool_name)
+    public static async Task CreateTraining(DateTime dateActual, string training_type, string pool_name, int client_id, int instructor_id)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
-        string sql = "SELECT client_id, instructor_id FROM client, instructor LIMIT 1";
-        dynamic result = await connection.QueryFirstAsync(sql);
-        int client_id = result.client_id;
-        int instructor_id = result.instructor_id;
+        //string sql = "SELECT client_id, instructor_id FROM client, instructor LIMIT 1";
+        //dynamic result = await connection.QueryFirstAsync(sql);
+        //int client_id = result.client_id;
+        //int instructor_id = result.instructor_id;
 
-        DateTime dateFormatted = new(date.Year, date.Month, date.Day);
-        sql = @"INSERT INTO training (date, training_type, pool_name, client_id, instructor_id)
+        string sql = @"INSERT INTO training (date, training_type, pool_name, client_id, instructor_id)
                         VALUES (@date, @training_type, @pool_name, @client_id, @instructor_id);";
-        await connection.ExecuteAsync(sql, new { date = dateFormatted,training_type, pool_name, client_id, instructor_id });
+        await connection.ExecuteAsync(sql, new { date = dateActual, training_type, pool_name, client_id, instructor_id });
     }
 
     public static async Task DeleteTraining(int trainingId)
@@ -92,6 +99,14 @@ public static class Database
         IEnumerable<Training> trainings = await connection.QueryAsync<Training>(sql);
         ObservableCollection<Training> result = [.. trainings];
         return result;
+    }
+
+    public static async Task<Training?> GetTrainingById(int trainingId)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT * FROM training WHERE training_id = @TrainingId;";
+        Training? training = await connection.QueryFirstOrDefaultAsync<Training>(sql, new { TrainingId = trainingId });
+        return training;
     }
 
     #endregion
@@ -132,5 +147,19 @@ public static class Database
         await connection.ExecuteAsync(sql, new { InstructorId = instructorId, FirstName = firstName, LastName = lastName, Age = age, PhoneNumber = phoneNumber, EmailAddress = emailAddress, Specialization = specialization });
     }
 
+    public static async Task<Instructor?> GetInstructorById(int instructorId)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT * FROM instructor WHERE instructor_id = @InstructorId;";
+        Instructor? instructor = await connection.QueryFirstOrDefaultAsync<Instructor>(sql, new { InstructorId = instructorId });
+        return instructor;
+    }
+
     #endregion
+
+    public static async Task<IEnumerable<dynamic>> ExecuteQuery(string query)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        return await connection.QueryAsync(query);
+    }
 }

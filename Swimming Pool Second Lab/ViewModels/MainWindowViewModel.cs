@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Swimming_Pool_One_Lab.Models;
+using Swimming_Pool_Second_Lab.Models;
 using System.Collections.ObjectModel;
 
-namespace Swimming_Pool_One_Lab.ViewModels;
+namespace Swimming_Pool_Second_Lab.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {

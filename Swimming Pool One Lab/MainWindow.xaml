@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Swimming_Pool_One_Lab"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewmodels="clr-namespace:Swimming_Pool.ViewModels"
+    xmlns:viewmodels="clr-namespace:Swimming_Pool_One_Lab.ViewModels"
     Title="Swimming Pool"
     Width="800"
     Height="450"
