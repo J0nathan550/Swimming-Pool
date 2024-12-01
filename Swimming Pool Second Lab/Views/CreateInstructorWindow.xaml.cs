@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace Swimming_Pool_Second_Lab.Views;
+namespace Swimming_Pool.Views;
 
 public partial class CreateInstructorWindow : Window
 {

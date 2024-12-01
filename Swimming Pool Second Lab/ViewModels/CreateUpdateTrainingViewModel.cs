@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Swimming_Pool_Second_Lab.Models;
+using Swimming_Pool.Models;
 using System.Collections.ObjectModel;
 
-namespace Swimming_Pool_Second_Lab.ViewModels;
+namespace Swimming_Pool.ViewModels;
 
 public partial class CreateUpdateTrainingViewModel : ObservableObject
 {

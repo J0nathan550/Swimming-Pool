@@ -1,15 +1,19 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Swimming_Pool_Second_Lab.Models;
+using Swimming_Pool.Models;
 using System.Collections.ObjectModel;
 
-namespace Swimming_Pool_Second_Lab.ViewModels;
+namespace Swimming_Pool.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {
     [ObservableProperty]
     private ObservableCollection<Client> clients = [];
     [ObservableProperty]
+    private ObservableCollection<Client> clientsWithNull = [];
+    [ObservableProperty]
     private ObservableCollection<Instructor> instructors = [];
+    [ObservableProperty]
+    private ObservableCollection<Instructor> instructorsWithNull = [];
     [ObservableProperty]
     private ObservableCollection<Training> trainings = [];
     [ObservableProperty]

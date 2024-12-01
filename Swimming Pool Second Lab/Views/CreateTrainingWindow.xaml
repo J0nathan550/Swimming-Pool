@@ -1,11 +1,11 @@
 ﻿<Window
-    x:Class="Swimming_Pool_Second_Lab.Views.CreateTrainingWindow"
+    x:Class="Swimming_Pool.Views.CreateTrainingWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:extended="http://schemas.xceed.com/wpf/xaml/toolkit"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewmodels="clr-namespace:Swimming_Pool_Second_Lab.ViewModels"
+    xmlns:viewmodels="clr-namespace:Swimming_Pool.ViewModels"
     Title="Swimming Pool - Creating Training"
     Width="337"
     Height="366"

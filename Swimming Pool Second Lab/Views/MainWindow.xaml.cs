@@ -1,11 +1,11 @@
-﻿using Swimming_Pool_Second_Lab.Models;
-using Swimming_Pool_Second_Lab.ViewModels;
+﻿using Swimming_Pool.Models;
+using Swimming_Pool.ViewModels;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace Swimming_Pool_Second_Lab.Views;
+namespace Swimming_Pool.Views;
 
 public partial class MainWindow : Window
 {
@@ -29,7 +29,11 @@ public partial class MainWindow : Window
         if (e.AddedItems.Count > 0 && e.AddedItems[0] is TabItem)
         {
             MainWindowViewModel.Clients = await Database.GetAllClients();
+            MainWindowViewModel.ClientsWithNull = [..MainWindowViewModel.Clients];
+            MainWindowViewModel.ClientsWithNull.Add(new Client() { ClientId = -1, FirstName = "Прибрати"});
             MainWindowViewModel.Instructors = await Database.GetAllInstructors();
+            MainWindowViewModel.InstructorsWithNull = [..MainWindowViewModel.Instructors];
+            MainWindowViewModel.InstructorsWithNull.Add(new Instructor() { InstructorId = -1, FirstName = "Прибрати" });
             MainWindowViewModel.Trainings = await Database.GetAllTrainings();
         }
     }
@@ -363,8 +367,10 @@ public partial class MainWindow : Window
     private void MenuItemAppQueryEditor_Click(object sender, RoutedEventArgs e)
     {
         TabControlView.Visibility = Visibility.Collapsed;
+        StatisticsGrid.Visibility = Visibility.Collapsed;
         QueryEditorGrid.Visibility = Visibility.Visible;
         MenuItemQueryEditor.IsEnabled = false;
+        MenuItemStatistics.IsEnabled = true;
         ClearSQLBox_Click(sender, e);
         ExecuteSQLButton_Click(sender, e);
     }
@@ -393,7 +399,90 @@ public partial class MainWindow : Window
     private void ExitQueryEditor_Click(object sender, RoutedEventArgs e)
     {
         MenuItemQueryEditor.IsEnabled = true;
+        MenuItemStatistics.IsEnabled = true;
         TabControlView.Visibility = Visibility.Visible;
         QueryEditorGrid.Visibility = Visibility.Collapsed;
+        StatisticsGrid.Visibility = Visibility.Collapsed;
     }
+
+    private void ToggleClientFilterButton_Click(object sender, RoutedEventArgs e)
+    {
+        if ((bool)FilterClientButton.IsChecked!)
+        {
+            FilterClientBlock.Visibility = Visibility.Visible;
+            return;
+        }
+        FilterClientBlock.Visibility = Visibility.Collapsed;
+    }
+
+    private async void ApplyFilterClientButton_Click(object sender, RoutedEventArgs e)
+    {
+        MainWindowViewModel.Clients = await Database.GetClientsFiltered(FilterClientFirstName.Text, FilterClientLastName.Text, FilterClientAge.Text, 
+            FilterClientPhoneNumber.Text, FilterClientEmailAddress.Text);
+    }
+
+    private void ToggleInstructorFilterButton_Click(object sender, RoutedEventArgs e)
+    {
+        if ((bool)FilterInstructorButton.IsChecked!)
+        {
+            FilterInstructorBlock.Visibility = Visibility.Visible;
+            return;
+        }
+        FilterInstructorBlock.Visibility = Visibility.Collapsed;
+    }
+
+    private async void ApplyFilterInstructorButton_Click(object sender, RoutedEventArgs e)
+    {
+        MainWindowViewModel.Instructors = await Database.GetInstructorsFiltered(FilterInstructorFirstName.Text, FilterInstructorLastName.Text, FilterInstructorAge.Text,
+            FilterInstructorPhoneNumber.Text, FilterInstructorEmailAddress.Text, FilterInstructorSpecialization.Text);
+    }
+
+    private void ToggleTrainingFilterButton_Click(object sender, RoutedEventArgs e)
+    {
+        if ((bool)FilterTrainingButton.IsChecked!)
+        {
+            FilterTrainingBlock.Visibility = Visibility.Visible;
+            return;
+        }
+        FilterTrainingBlock.Visibility = Visibility.Collapsed;
+    }
+
+    private async void ApplyFilterTrainingButton_Click(object sender, RoutedEventArgs e)
+    {
+        Client? client = (Client)FilterTrainingClientComboBox.SelectedItem;
+        Instructor? instructor = (Instructor)FilterTrainingInstructorComboBox.SelectedItem;
+        MainWindowViewModel.Trainings = await Database.GetTrainingFiltered(FilterTrainingYear.Value, FilterTrainingMonth.Value, FilterTrainingDay.Value, FilterTrainingTrainingType.Text, FilterTrainingPoolName.Text,
+            client?.ClientId, instructor?.InstructorId);
+    }
+
+    public static void SelectItemById<T>(ComboBox comboBox, T targetItem, Func<T, int> idSelector)
+    {
+        if (comboBox.ItemsSource == null || targetItem == null) return;
+        int targetId = idSelector(targetItem);
+        int index = comboBox.ItemsSource.Cast<T>().ToList().FindIndex(item => idSelector(item) == targetId);
+        comboBox.SelectedIndex = index >= 0 ? index : -1;
+    }
+
+    private async void MenuItemAppStatistics_Click(object sender, RoutedEventArgs e)
+    {
+        TabControlView.Visibility = Visibility.Collapsed;
+        StatisticsGrid.Visibility = Visibility.Visible;
+        QueryEditorGrid.Visibility = Visibility.Collapsed;
+        MenuItemStatistics.IsEnabled = false;
+        MenuItemQueryEditor.IsEnabled = true;
+        TextBlockResultAgeClient.Text = await Database.CalculateClientAgeStatistics();
+        TextBlockResultAgeInstructor.Text = await Database.CalculateInstructorAgeStatistics();
+    }
+
+    private async void ComboBoxStatisticsNumClients_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        Instructor instructor = (Instructor)StatisticsComboBoxNumClients.SelectedItem;
+        ResultNumClientsTextBlock.Text = await Database.CalculateNumClientStatistics(instructor?.InstructorId ?? -1);
+    }
+
+    private async void ComboBoxMonthStatistics_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        ResultNumOfTrainingsPerMonthTextBlock.Text = await Database.CalculateNumTrainingsPerMonth(ComboBoxMonthStatistics.SelectedIndex + 1);
+    }
+
 }

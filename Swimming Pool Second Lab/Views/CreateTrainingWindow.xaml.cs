@@ -1,9 +1,9 @@
-﻿using Swimming_Pool_Second_Lab.Models;
-using Swimming_Pool_Second_Lab.ViewModels;
+﻿using Swimming_Pool.Models;
+using Swimming_Pool.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Swimming_Pool_Second_Lab.Views;
+namespace Swimming_Pool.Views;
 
 public partial class CreateTrainingWindow : Window
 {

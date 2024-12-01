@@ -1,9 +1,11 @@
 ﻿using Dapper;
 using MySqlConnector;
-using Swimming_Pool_Second_Lab.Models;
+using Swimming_Pool.Models;
 using System.Collections.ObjectModel;
+using System.Windows.Controls;
+using Xceed.Wpf.Toolkit;
 
-namespace Swimming_Pool_Second_Lab;
+namespace Swimming_Pool;
 
 public static class Database
 {
@@ -51,6 +53,74 @@ public static class Database
         string sql = "SELECT * FROM client WHERE client_id = @ClientId;";
         Client? client = await connection.QueryFirstOrDefaultAsync<Client>(sql, new { ClientId = clientId });
         return client;
+    }
+
+    public static async Task<ObservableCollection<Client>> GetClientsFiltered(string firstName, string lastName, string age, string phoneNumber, string email)
+    {
+        bool first = true;
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT * FROM client";
+        if (!string.IsNullOrEmpty(firstName))
+        {
+            sql += " WHERE first_name LIKE @FirstName";
+            first = false;
+            firstName = "%" + firstName + "%";
+        }
+        if (!string.IsNullOrEmpty(lastName))
+        {
+            if (first)
+            {
+                sql += " WHERE last_name LIKE @LastName";
+            }
+            else
+            {
+                sql += " AND last_name LIKE @LastName";
+            }
+            lastName = "%" + lastName + "%";
+            first = false;
+        }
+        if (!string.IsNullOrEmpty(age))
+        {
+            if (first)
+            {
+                sql += " WHERE age LIKE @Age";
+            }
+            else
+            {
+                sql += " AND age LIKE @Age";
+            }
+            age = "%" + age + "%";
+            first = false;
+        }
+        if (!string.IsNullOrEmpty(phoneNumber))
+        {
+            if (first)
+            {
+                sql += " WHERE phone_number LIKE @PhoneNumber";
+            }
+            else
+            {
+                sql += " AND phone_number LIKE @PhoneNumber";
+            }
+            phoneNumber = "%" + phoneNumber + "%";
+            first = false;
+        }
+        if (!string.IsNullOrEmpty(email))
+        {
+            if (first)
+            {
+                sql += " WHERE email_address LIKE @EmailAddress";
+            }
+            else
+            {
+                sql += " AND email_address LIKE @EmailAddress";
+            }
+            email = "%" + email + "%";
+            first = false;
+        }
+        IEnumerable<Client> clients = await connection.QueryAsync<Client>(sql, new { FirstName = firstName, LastName = lastName, Age = age, PhoneNumber = phoneNumber, EmailAddress = email });
+        ObservableCollection<Client> result = [.. clients];
+        return result;
     }
 
     #endregion
@@ -109,6 +179,104 @@ public static class Database
         return training;
     }
 
+    public static async Task<ObservableCollection<Training>> GetTrainingFiltered(int? year, int? month, int? day, string trainingType, string poolName, int? clientId, int? instructorId)
+    {
+        bool first = true;
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT training.*, client.first_name AS clientName, instructor.first_name AS instructorName FROM training LEFT JOIN client ON training.client_id = client.client_id LEFT JOIN instructor ON training.instructor_id = instructor.instructor_id";
+        string date = string.Empty;
+        if (year != null)
+        {
+            if (first)
+            {
+                sql += " WHERE YEAR(date) = @Year";
+            }
+            else
+            {
+                sql += " AND YEAR(date) = @Year";
+            }
+            first = false;
+        }
+        if (month != null)
+        {
+            if (first)
+            {
+                sql += " WHERE MONTH(date) = @Month";
+            }
+            else
+            {
+                sql += " AND MONTH(date) = @Month";
+            }
+            first = false;
+        }
+        if (day != null)
+        {
+            if (first)
+            {
+                sql += " WHERE DAY(date) = @Day";
+            }
+            else
+            {
+                sql += " AND DAY(date) = @Day";
+            }
+            first = false;
+        }
+        if (!string.IsNullOrEmpty(trainingType))
+        {
+            if (first)
+            {
+                sql += " WHERE training_type LIKE @TrainingType";
+            }
+            else
+            {
+                sql += " AND training_type LIKE @TrainingType";
+            }
+            trainingType = "%" + trainingType + "%";
+            first = false;
+        }
+        if (!string.IsNullOrEmpty(poolName))
+        {
+            if (first)
+            {
+                sql += " WHERE pool_name LIKE @PoolName";
+            }
+            else
+            {
+                sql += " AND pool_name LIKE @PoolName";
+            }
+            poolName = "%" + poolName + "%";
+            first = false;
+        }
+        if (clientId != null && clientId != -1)
+        {
+            if (first)
+            {
+                sql += " WHERE client.client_id = @ClientId";
+            }
+            else
+            {
+                sql += " AND client.client_id = @ClientId";
+            }
+            first = false;
+        }
+        if (instructorId != null && instructorId != -1)
+        {
+            if (first)
+            {
+                sql += " WHERE instructor.instructor_id = @InstructorId";
+            }
+            else
+            {
+                sql += " AND instructor.instructor_id = @InstructorId";
+            }
+            first = false;
+        }
+        sql += " ORDER BY training_id";
+        IEnumerable<Training> trainings = await connection.QueryAsync<Training>(sql, new { Year = year, Month = month, Day = day, TrainingType = trainingType, PoolName = poolName, ClientId = clientId, InstructorId = instructorId });
+        ObservableCollection<Training> result = [.. trainings];
+        return result;
+    }
+
     #endregion
 
     #region Instructor Queries
@@ -153,6 +321,127 @@ public static class Database
         string sql = "SELECT * FROM instructor WHERE instructor_id = @InstructorId;";
         Instructor? instructor = await connection.QueryFirstOrDefaultAsync<Instructor>(sql, new { InstructorId = instructorId });
         return instructor;
+    }
+
+    public static async Task<ObservableCollection<Instructor>> GetInstructorsFiltered(string firstName, string lastName, string age, string phoneNumber, string email, string specialization)
+    {
+        bool first = true;
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT * FROM instructor";
+        if (!string.IsNullOrEmpty(firstName))
+        {
+            sql += " WHERE first_name LIKE @FirstName";
+            first = false;
+            firstName = "%" + firstName + "%";
+        }
+        if (!string.IsNullOrEmpty(lastName))
+        {
+            if (first)
+            {
+                sql += " WHERE last_name LIKE @LastName";
+            }
+            else
+            {
+                sql += " AND last_name LIKE @LastName";
+            }
+            lastName = "%" + lastName + "%";
+            first = false;
+        }
+        if (!string.IsNullOrEmpty(age))
+        {
+            if (first)
+            {
+                sql += " WHERE age LIKE @Age";
+            }
+            else
+            {
+                sql += " AND age LIKE @Age";
+            }
+            age = "%" + age + "%";
+            first = false;
+        }
+        if (!string.IsNullOrEmpty(phoneNumber))
+        {
+            if (first)
+            {
+                sql += " WHERE phone_number LIKE @PhoneNumber";
+            }
+            else
+            {
+                sql += " AND phone_number LIKE @PhoneNumber";
+            }
+            phoneNumber = "%" + phoneNumber + "%";
+            first = false;
+        }
+        if (!string.IsNullOrEmpty(email))
+        {
+            if (first)
+            {
+                sql += " WHERE email_address LIKE @EmailAddress";
+            }
+            else
+            {
+                sql += " AND email_address LIKE @EmailAddress";
+            }
+            email = "%" + email + "%";
+            first = false;
+        }
+        if (!string.IsNullOrEmpty(specialization))
+        {
+            if (first)
+            {
+                sql += " WHERE specialization LIKE @Specialization";
+            }
+            else
+            {
+                sql += " AND specialization LIKE @Specialization";
+            }
+            specialization = "%" + specialization + "%";
+            first = false;
+        }
+        IEnumerable<Instructor> instructors = await connection.QueryAsync<Instructor>(sql, new { FirstName = firstName, LastName = lastName, Age = age, PhoneNumber = phoneNumber, EmailAddress = email });
+        ObservableCollection<Instructor> result = [.. instructors];
+        return result;
+    }
+
+    #endregion
+
+    #region Statistics
+
+    public static async Task<string> CalculateClientAgeStatistics()
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT AVG(age) FROM client;";
+        var tmp = await connection.ExecuteScalarAsync(sql);
+        if (tmp is decimal result) return result.ToString("F2");
+        return "";
+    }
+
+    public static async Task<string> CalculateInstructorAgeStatistics()
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT AVG(age) FROM instructor;";
+        var tmp = await connection.ExecuteScalarAsync(sql);
+        if (tmp is decimal result) return result.ToString("F2");
+        return "";
+    }
+
+    public static async Task<string> CalculateNumClientStatistics(int instructorId)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT COUNT(training.client_id) FROM training WHERE training.instructor_id = @InstructorId";
+        var tmp = await connection.ExecuteScalarAsync(sql, new { InstructorId = instructorId });
+        if (tmp is long result) return result.ToString();
+        return "";
+    }
+
+    public static async Task<string> CalculateNumTrainingsPerMonth(int month)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT COUNT(training.training_id) FROM training WHERE MONTH(training.date) = @Month";
+        var tmp = await connection.ExecuteScalarAsync(sql, new { Month = month });
+        if (tmp is long result) return result.ToString();
+        return "";
     }
 
     #endregion

@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using Swimming_Pool_Second_Lab.Views;
+using Swimming_Pool.Views;
 
-namespace Swimming_Pool_Second_Lab.Models;
+namespace Swimming_Pool.Models;
 
 public partial class Instructor
 {

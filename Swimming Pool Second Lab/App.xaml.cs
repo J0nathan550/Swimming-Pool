@@ -1,5 +1,5 @@
 ﻿using System.Windows;
 
-namespace Swimming_Pool_Second_Lab;
+namespace Swimming_Pool;
 
 public partial class App : Application;

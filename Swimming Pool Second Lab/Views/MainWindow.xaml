@@ -1,11 +1,12 @@
 ﻿<Window
-    x:Class="Swimming_Pool_Second_Lab.Views.MainWindow"
+    x:Class="Swimming_Pool.Views.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:Swimming_Pool_Second_Lab"
+    xmlns:extended="http://schemas.xceed.com/wpf/xaml/toolkit"
+    xmlns:local="clr-namespace:Swimming_Pool"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewmodels="clr-namespace:Swimming_Pool_Second_Lab.ViewModels"
+    xmlns:viewmodels="clr-namespace:Swimming_Pool.ViewModels"
     Title="Swimming Pool"
     Width="800"
     Height="450"
@@ -25,10 +26,109 @@
                     Header="Query Editor" />
                 <MenuItem Click="MenuItemApp_Click" Header="Exit" />
             </MenuItem>
+            <MenuItem
+                Name="MenuItemStatistics"
+                Click="MenuItemAppStatistics_Click"
+                Header="Statistics" />
         </Menu>
+        <Grid
+            Name="StatisticsGrid"
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            Margin="5"
+            Visibility="Collapsed">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    HorizontalAlignment="Right"
+                    Text="Average Age of Clients:" />
+                <TextBlock
+                    Name="TextBlockResultAgeClient"
+                    Grid.Row="0"
+                    Grid.Column="2"
+                    Text="Result Age Client" />
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    HorizontalAlignment="Right"
+                    Text="Average Age of Instructor:" />
+                <TextBlock
+                    Name="TextBlockResultAgeInstructor"
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    Text="Result Age instructor" />
+                <StackPanel Grid.Row="2" Grid.Column="0">
+                    <TextBlock HorizontalAlignment="Right" Text="Number of clients per instructor:" />
+                    <ComboBox
+                        Name="StatisticsComboBoxNumClients"
+                        ItemsSource="{Binding Instructors}"
+                        SelectedIndex="0"
+                        SelectedValuePath="Id"
+                        SelectionChanged="ComboBoxStatisticsNumClients_SelectionChanged">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding InstructorId}" />
+                                    <Run Text="{Binding FirstName}" />
+                                    <Run Text="{Binding LastName}" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <TextBlock
+                    Name="ResultNumClientsTextBlock"
+                    Grid.Row="2"
+                    Grid.Column="2"
+                    Text="Result num clients" />
+                <StackPanel Grid.Row="3" Grid.Column="0">
+                    <TextBlock HorizontalAlignment="Right" Text="Number of trainings per month:" />
+                    <ComboBox Name="ComboBoxMonthStatistics" SelectionChanged="ComboBoxMonthStatistics_SelectionChanged">
+                        <ComboBoxItem Content="1" />
+                        <ComboBoxItem Content="2" />
+                        <ComboBoxItem Content="3" />
+                        <ComboBoxItem Content="4" />
+                        <ComboBoxItem Content="5" />
+                        <ComboBoxItem Content="6" />
+                        <ComboBoxItem Content="7" />
+                        <ComboBoxItem Content="8" />
+                        <ComboBoxItem Content="9" />
+                        <ComboBoxItem Content="10" />
+                        <ComboBoxItem Content="11" />
+                        <ComboBoxItem Content="12" />
+                    </ComboBox>
+                </StackPanel>
+                <TextBlock
+                    Name="ResultNumOfTrainingsPerMonthTextBlock"
+                    Grid.Row="3"
+                    Grid.Column="2"
+                    Text="Result num of trainings per month" />
+                <Button
+                    Grid.Row="4"
+                    Grid.Column="0"
+                    Margin="0,5,0,0"
+                    Click="ExitQueryEditor_Click">
+                    <TextBlock Text="Close statistics" />
+                </Button>
+            </Grid>
+        </Grid>
         <Grid
             Name="QueryEditorGrid"
             Grid.Row="1"
+            Grid.RowSpan="2"
             Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition />
@@ -89,13 +189,61 @@
                 <Grid Background="#FFE5E5E5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <Menu>
                         <MenuItem Click="MenuItemClient_Click" Header="Add Client" />
                     </Menu>
-                    <DataGrid
+                    <ToggleButton
+                        Name="FilterClientButton"
+                        Width="17"
+                        Height="17"
+                        HorizontalAlignment="Right"
+                        Click="ToggleClientFilterButton_Click">
+                        <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Icons/filter.png" />
+                    </ToggleButton>
+                    <Grid
+                        Name="FilterClientBlock"
                         Grid.Row="1"
+                        Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <extended:WatermarkTextBox
+                            Name="FilterClientFirstName"
+                            Grid.Column="0"
+                            Watermark="First Name Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterClientLastName"
+                            Grid.Column="1"
+                            Watermark="Last Name Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterClientAge"
+                            Grid.Column="2"
+                            Watermark="Age Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterClientPhoneNumber"
+                            Grid.Column="3"
+                            Watermark="Phone Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterClientEmailAddress"
+                            Grid.Column="4"
+                            Watermark="Email Filter..." />
+                        <Button
+                            Grid.Column="5"
+                            Width="17"
+                            Click="ApplyFilterClientButton_Click">
+                            <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Icons/checkmark.png" />
+                        </Button>
+                    </Grid>
+                    <DataGrid
+                        Grid.Row="2"
                         AutoGenerateColumns="False"
                         CanUserAddRows="False"
                         CellEditEnding="DataGridClient_CellEditEnding"
@@ -124,13 +272,66 @@
                 <Grid Background="#FFE5E5E5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <Menu>
                         <MenuItem Click="MenuItemInstructor_Click" Header="Add Instructor" />
                     </Menu>
-                    <DataGrid
+                    <ToggleButton
+                        Name="FilterInstructorButton"
+                        Width="17"
+                        Height="17"
+                        HorizontalAlignment="Right"
+                        Click="ToggleInstructorFilterButton_Click">
+                        <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Icons/filter.png" />
+                    </ToggleButton>
+                    <Grid
+                        Name="FilterInstructorBlock"
                         Grid.Row="1"
+                        Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <extended:WatermarkTextBox
+                            Name="FilterInstructorFirstName"
+                            Grid.Column="0"
+                            Watermark="First Name Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterInstructorLastName"
+                            Grid.Column="1"
+                            Watermark="Last Name Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterInstructorAge"
+                            Grid.Column="2"
+                            Watermark="Age Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterInstructorPhoneNumber"
+                            Grid.Column="3"
+                            Watermark="Phone Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterInstructorEmailAddress"
+                            Grid.Column="4"
+                            Watermark="Email Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterInstructorSpecialization"
+                            Grid.Column="5"
+                            Watermark="Email Filter..." />
+                        <Button
+                            Grid.Column="6"
+                            Width="17"
+                            Click="ApplyFilterInstructorButton_Click">
+                            <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Icons/checkmark.png" />
+                        </Button>
+                    </Grid>
+                    <DataGrid
+                        Grid.Row="2"
                         AutoGenerateColumns="False"
                         CanUserAddRows="False"
                         CellEditEnding="DataGridInstructor_CellEditEnding"
@@ -160,16 +361,100 @@
                 <Grid Background="#FFE5E5E5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <Menu>
                         <MenuItem Click="MenuItemTraining_Click" Header="Add Training" />
                     </Menu>
-                    <Grid Grid.Row="1">
+                    <ToggleButton
+                        Name="FilterTrainingButton"
+                        Width="17"
+                        Height="17"
+                        HorizontalAlignment="Right"
+                        Click="ToggleTrainingFilterButton_Click">
+                        <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Icons/filter.png" />
+                    </ToggleButton>
+                    <Grid
+                        Name="FilterTrainingBlock"
+                        Grid.Row="1"
+                        Visibility="Collapsed">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4*" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
+                        <extended:IntegerUpDown
+                            Name="FilterTrainingYear"
+                            Grid.Column="0"
+                            Maximum="2100"
+                            Minimum="2000"
+                            Watermark="Year Filter..." />
+                        <extended:IntegerUpDown
+                            Name="FilterTrainingMonth"
+                            Grid.Column="1"
+                            Maximum="12"
+                            Minimum="1"
+                            Watermark="Month Filter..." />
+                        <extended:IntegerUpDown
+                            Name="FilterTrainingDay"
+                            Grid.Column="2"
+                            Maximum="31"
+                            Minimum="1"
+                            Watermark="Day Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterTrainingTrainingType"
+                            Grid.Column="3"
+                            Watermark="Training Type Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterTrainingPoolName"
+                            Grid.Column="4"
+                            Watermark="Pool Name Filter..." />
+                        <ComboBox
+                            Name="FilterTrainingClientComboBox"
+                            Grid.Column="5"
+                            ItemsSource="{Binding ClientsWithNull}"
+                            SelectedIndex="0"
+                            SelectedValuePath="Id">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <Run Text="{Binding ClientId}" />
+                                        <Run Text="{Binding FirstName}" />
+                                        <Run Text="{Binding LastName}" />
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <ComboBox
+                            Name="FilterTrainingInstructorComboBox"
+                            Grid.Column="6"
+                            ItemsSource="{Binding InstructorsWithNull}"
+                            SelectedIndex="0"
+                            SelectedValuePath="Id">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <Run Text="{Binding InstructorId}" />
+                                        <Run Text="{Binding FirstName}" />
+                                        <Run Text="{Binding LastName}" />
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Button
+                            Grid.Column="7"
+                            Width="17"
+                            Click="ApplyFilterTrainingButton_Click">
+                            <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Icons/checkmark.png" />
+                        </Button>
+                    </Grid>
+                    <Grid Grid.Row="2">
                         <DataGrid
                             Margin="0,0,1,0"
                             AutoGenerateColumns="False"
@@ -201,22 +486,6 @@
                                 </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
-                        <StackPanel Grid.Column="1" Margin="1,0,0,0">
-                            <TextBlock Margin="5" Text="Select Client" />
-                            <ComboBox
-                                DisplayMemberPath="FirstName"
-                                ItemsSource="{Binding Path=DataContext.Clients, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
-                                SelectedValue="{Binding SelectedClientId}"
-                                SelectedValuePath="ClientId"
-                                SelectionChanged="ComboBoxClient_SelectionChanged" />
-                            <TextBlock Margin="5" Text="Select Instructor" />
-                            <ComboBox
-                                DisplayMemberPath="FirstName"
-                                ItemsSource="{Binding Path=DataContext.Instructors, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
-                                SelectedValue="{Binding SelectedInstructorId}"
-                                SelectedValuePath="InstructorId"
-                                SelectionChanged="ComboBoxInstructor_SelectionChanged" />
-                        </StackPanel>
                     </Grid>
                 </Grid>
             </TabItem>
