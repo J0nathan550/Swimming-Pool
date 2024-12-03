@@ -59,7 +59,7 @@ public partial class CreateClientWindow : Window
         }
         else
         {
-            if (!int.TryParse(AgeTextBox.Text, out int age))
+            if (!int.TryParse(AgeTextBox.Text, out _))
             {
                 isOkay = false;
             }

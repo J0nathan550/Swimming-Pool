@@ -39,7 +39,7 @@ public partial class MainWindow : Window
 
             MainWindowViewModel.Pools = await Database.GetAllPools();
             MainWindowViewModel.PoolsWithNull = [..MainWindowViewModel.Pools];
-            Pool nullPool = new Pool() { PoolId = -1, Name = "Прибрати басейн" };
+            Pool nullPool = new() { PoolId = -1, Name = "Прибрати басейн" };
             MainWindowViewModel.PoolsWithNull.Add(nullPool);
 
             SelectItemById(FilterTrainingInstructorComboBox, nullInstructor, i => i!.InstructorId);
@@ -259,7 +259,7 @@ public partial class MainWindow : Window
 
     private async void ComboBoxClient_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (e.AddedItems.Count > 0 && e.AddedItems[0] is Client client && MainWindowViewModel.SelectedTraining != null)
+        if (e.AddedItems.Count > 0 && e.AddedItems[0] is Client && MainWindowViewModel.SelectedTraining != null)
         {
             Training t = MainWindowViewModel.SelectedTraining;
 

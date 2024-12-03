@@ -339,7 +339,7 @@ public static class Database
         foreach (Training training in trainings) 
         {
             sql = "SELECT CONCAT(c.first_name, \" \", c.last_name) AS clientName FROM client as c LEFT JOIN client_training_enrollment AS e ON c.client_id = e.client_id WHERE e.training_id = @TrainingId";
-            var result = await connection.QueryAsync<string>(sql, new { TrainingId = training.TrainingId });
+            var result = await connection.QueryAsync<string>(sql, new { training.TrainingId });
             string clientNames = "";
             foreach (var name in result)
             {
@@ -352,7 +352,7 @@ public static class Database
             training.ClientNames = clientNames;
 
             sql = "SELECT name FROM pool WHERE pool_id = @PoolId";
-            string? poolName = await connection.QueryFirstAsync<string>(sql, new { PoolId = training.PoolId });
+            string? poolName = await connection.QueryFirstAsync<string>(sql, new { training.PoolId });
             training.PoolName = poolName;
         }
 
@@ -405,7 +405,7 @@ public static class Database
         instructor ON training.instructor_id = instructor.instructor_id";
 
         // Apply filters
-        List<string> conditions = new List<string>();
+        List<string> conditions = [];
         if (year.HasValue) conditions.Add("YEAR(training.date) = @Year");
         if (month.HasValue) conditions.Add("MONTH(training.date) = @Month");
         if (day.HasValue) conditions.Add("DAY(training.date) = @Day");
@@ -430,13 +430,13 @@ public static class Database
             InstructorId = instructorId
         });
 
-        List<Training> trainingResult = new List<Training>();
+        List<Training> trainingResult = [];
 
         foreach (Training training in trainings)
         {
             // Get client names for each training
             sql = "SELECT CONCAT(c.first_name, ' ', c.last_name) AS clientName FROM client as c LEFT JOIN client_training_enrollment AS e ON c.client_id = e.client_id WHERE e.training_id = @TrainingId";
-            var clientNamesResult = await connection.QueryAsync<string>(sql, new { TrainingId = training.TrainingId });
+            var clientNamesResult = await connection.QueryAsync<string>(sql, new { training.TrainingId });
 
             // Concatenate client names
             string clientNamesConcatenated = string.Join(", ", clientNamesResult);
@@ -451,7 +451,7 @@ public static class Database
 
                 // Get pool name
                 sql = "SELECT name FROM pool WHERE pool_id = @PoolId";
-                string? poolName = await connection.QueryFirstAsync<string>(sql, new { PoolId = training.PoolId });
+                string? poolName = await connection.QueryFirstAsync<string>(sql, new { training.PoolId });
                 training.PoolName = poolName;
 
                 trainingResult.Add(training);

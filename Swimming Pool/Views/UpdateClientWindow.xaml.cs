@@ -74,7 +74,7 @@ public partial class UpdateClientWindow : Window
         }
         else
         {
-            if (!int.TryParse(AgeTextBox.Text, out int age))
+            if (!int.TryParse(AgeTextBox.Text, out _))
             {
                 isOkay = false;
             }

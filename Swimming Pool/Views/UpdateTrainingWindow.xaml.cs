@@ -63,9 +63,9 @@ public partial class UpdateTrainingWindow : Window
         {
             dateTime = (DateTime)DateTimePicker.Value;
         }
-        Client client = (Client)ClientComboBox.SelectedItem;
+        Pool pool = (Pool)PoolComboBox.SelectedItem;
         Instructor instructor = (Instructor)InstructorComboBox.SelectedItem;
-        //await Database.UpdateTraining(_trainingID, dateTime, TrainingTypeTextBox.Text, PoolNameTextBox.Text, client.ClientId, instructor.InstructorId);
+        await Database.UpdateTraining(_trainingID, dateTime, TrainingTypeTextBox.Text, pool.PoolId, instructor.InstructorId);
         MainWindow.MainWindowViewModel.Trainings = await Database.GetAllTrainings();
         Close();
     }
