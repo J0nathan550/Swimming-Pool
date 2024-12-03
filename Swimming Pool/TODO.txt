@@ -1,0 +1,10 @@
+Make adequate filtering by year, month, number
+Make filtering, search, in dialogs so that it is convenient
+Make a more pleasant interface for business logic
+Make adequate statistics (for example, top instructors by schedule) using ScottPlot (histograms)
+Make a system of reports in PDF (PDF export)
+For Query Editor, make rules so that the database is not deleted
+Add a button to clients so that it is easier to subscribe to subscriptions
+Divide the subscription creation (subscription type in a separate table) to pull up data for the combo box. (It will be a million times easier)
+Remove the number of visits because there is no point in them?
+Divide the specialization as a table so that in the combo box it is possible not to write but to simply select

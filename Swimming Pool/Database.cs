@@ -384,25 +384,18 @@ public static class Database
         return await connection.QueryFirstOrDefaultAsync<Training>(trainingSql, new { TrainingId = trainingId });
     }
 
-    public static async Task<ObservableCollection<Training>> GetTrainingFiltered(
-    int? year,
-    int? month,
-    int? day,
-    string trainingType,
-    string clientNames,
-    int? poolId,
-    int? instructorId)
+    public static async Task<ObservableCollection<Training>> GetTrainingFiltered(int? year, int? month, int? day, string trainingType, string clientNames, int? poolId, int? instructorId)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
 
         string sql = @"
-    SELECT 
-        training.*, 
-        instructor.first_name AS instructorName
-    FROM 
-        training 
-    LEFT JOIN 
-        instructor ON training.instructor_id = instructor.instructor_id";
+        SELECT 
+            training.*, 
+            instructor.first_name AS instructorName
+        FROM 
+            training 
+        LEFT JOIN 
+            instructor ON training.instructor_id = instructor.instructor_id";
 
         // Apply filters
         List<string> conditions = [];
@@ -727,12 +720,7 @@ public static class Database
 
     #endregion
 
-    public static async Task<IEnumerable<dynamic>> ExecuteQuery(string query)
-    {
-        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
-        return await connection.QueryAsync(query);
-    }
-
+    #region Enrollments
     public static async Task<ObservableCollection<ClientTrainingEnrollment>> GetAllEnrollments(int trainingID)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
@@ -763,5 +751,13 @@ public static class Database
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
         string sql = @"DELETE FROM client_training_enrollment WHERE training_id = @TrainingId AND client_id = @ClientId";
         await connection.ExecuteAsync(sql, new { TrainingId = trainingId, ClientId = clientId });
+    }
+
+    #endregion
+
+    public static async Task<IEnumerable<dynamic>> ExecuteQuery(string query)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        return await connection.QueryAsync(query);
     }
 }
