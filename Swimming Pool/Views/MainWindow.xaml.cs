@@ -29,11 +29,22 @@ public partial class MainWindow : Window
         if (e.AddedItems.Count > 0 && e.AddedItems[0] is TabItem)
         {
             MainWindowViewModel.Clients = await Database.GetAllClients();
-            MainWindowViewModel.ClientsWithNull = [..MainWindowViewModel.Clients];
-            MainWindowViewModel.ClientsWithNull.Add(new Client() { ClientId = -1, FirstName = "Прибрати"});
+
             MainWindowViewModel.Instructors = await Database.GetAllInstructors();
             MainWindowViewModel.InstructorsWithNull = [..MainWindowViewModel.Instructors];
-            MainWindowViewModel.InstructorsWithNull.Add(new Instructor() { InstructorId = -1, FirstName = "Прибрати" });
+            Instructor nullInstructor = new() { InstructorId = -1, FirstName = "Прибрати інструктора" };
+            MainWindowViewModel.InstructorsWithNull.Add(nullInstructor);
+
+            MainWindowViewModel.Subscriptions = await Database.GetAllSubscriptions();
+
+            MainWindowViewModel.Pools = await Database.GetAllPools();
+            MainWindowViewModel.PoolsWithNull = [..MainWindowViewModel.Pools];
+            Pool nullPool = new Pool() { PoolId = -1, Name = "Прибрати басейн" };
+            MainWindowViewModel.PoolsWithNull.Add(nullPool);
+
+            SelectItemById(FilterTrainingInstructorComboBox, nullInstructor, i => i!.InstructorId);
+            SelectItemById(FilterTrainingPoolComboBox, nullPool, i => i!.PoolId);
+
             MainWindowViewModel.Trainings = await Database.GetAllTrainings();
         }
     }
@@ -151,9 +162,11 @@ public partial class MainWindow : Window
         {
             DataGridRow row = e.Row;
             Training training = (Training)row.Item;
+
             if (e.EditingElement is TextBox tb)
             {
                 string valueNew = tb.Text;
+
                 switch (e.Column.Header.ToString())
                 {
                     case "Date":
@@ -165,31 +178,47 @@ public partial class MainWindow : Window
                                 training.TrainingId,
                                 actualDateValue,
                                 training.TrainingType ?? string.Empty,
-                                training.PoolName ?? string.Empty,
-                                training.ClientId,
-                                training.InstructorId);
+                                training.PoolId,
+                                training.InstructorId
+                            );
                         }
                         else
                         {
                             tb.Text = training.Date.ToString("yyyy-MM-dd HH:mm");
                         }
                         break;
+
                     case "Training Type":
                         if (!string.IsNullOrWhiteSpace(valueNew))
                         {
                             training.TrainingType = valueNew;
-                            await Database.UpdateTraining(training.TrainingId, training.Date, valueNew, training.PoolName!, training.ClientId, training.InstructorId);
+
+                            await Database.UpdateTraining(
+                                training.TrainingId,
+                                training.Date,
+                                valueNew,
+                                training.PoolId,
+                                training.InstructorId
+                            );
                         }
                         else
                         {
                             tb.Text = training.TrainingType;
                         }
                         break;
+
                     case "Pool Name":
                         if (!string.IsNullOrWhiteSpace(valueNew))
                         {
                             training.PoolName = valueNew;
-                            await Database.UpdateTraining(training.TrainingId, training.Date, training.TrainingType!, valueNew, training.ClientId, training.InstructorId);
+
+                            await Database.UpdateTraining(
+                                training.TrainingId,
+                                training.Date,
+                                training.TrainingType!,
+                                training.PoolId,
+                                training.InstructorId
+                            );
                         }
                         else
                         {
@@ -224,7 +253,6 @@ public partial class MainWindow : Window
         if (e.AddedItems.Count > 0 && e.AddedItems[0] is Training training)
         {
             MainWindowViewModel.SelectedTraining = training;
-            MainWindowViewModel.SelectedClientId = training.ClientId;
             MainWindowViewModel.SelectedInstructorId = training.InstructorId;
         }
     }
@@ -234,9 +262,14 @@ public partial class MainWindow : Window
         if (e.AddedItems.Count > 0 && e.AddedItems[0] is Client client && MainWindowViewModel.SelectedTraining != null)
         {
             Training t = MainWindowViewModel.SelectedTraining;
-            t.ClientId = client.ClientId;
-            t.ClientName = client.FirstName;
-            await Database.UpdateTraining(t.TrainingId, t.Date, t.TrainingType!, t.PoolName!, t.ClientId, t.InstructorId);
+
+            await Database.UpdateTraining(
+                t.TrainingId,
+                t.Date,
+                t.TrainingType!,
+                t.PoolId,
+                t.InstructorId
+            );
             MainWindowViewModel.Trainings = await Database.GetAllTrainings();
         }
     }
@@ -248,7 +281,14 @@ public partial class MainWindow : Window
             Training t = MainWindowViewModel.SelectedTraining;
             t.InstructorId = instructor.InstructorId;
             t.InstructorName = instructor.FirstName;
-            await Database.UpdateTraining(t.TrainingId, t.Date, t.TrainingType!, t.PoolName!, t.ClientId, t.InstructorId);
+
+            await Database.UpdateTraining(
+                t.TrainingId,
+                t.Date,
+                t.TrainingType!,
+                t.PoolId,
+                t.InstructorId
+            );
             MainWindowViewModel.Trainings = await Database.GetAllTrainings();
         }
     }
@@ -449,10 +489,17 @@ public partial class MainWindow : Window
 
     private async void ApplyFilterTrainingButton_Click(object sender, RoutedEventArgs e)
     {
-        Client? client = (Client)FilterTrainingClientComboBox.SelectedItem;
         Instructor? instructor = (Instructor)FilterTrainingInstructorComboBox.SelectedItem;
-        MainWindowViewModel.Trainings = await Database.GetTrainingFiltered(FilterTrainingYear.Value, FilterTrainingMonth.Value, FilterTrainingDay.Value, FilterTrainingTrainingType.Text, FilterTrainingPoolName.Text,
-            client?.ClientId, instructor?.InstructorId);
+        Pool? pool = (Pool)FilterTrainingPoolComboBox.SelectedItem;
+        MainWindowViewModel.Trainings = await Database.GetTrainingFiltered(
+            FilterTrainingYear.Value,
+            FilterTrainingMonth.Value,
+            FilterTrainingDay.Value,
+            FilterTrainingTrainingType.Text,
+            FilterTrainingClientNames.Text,
+            pool?.PoolId ?? -1,
+            instructor?.InstructorId ?? -1
+        );
     }
 
     public static void SelectItemById<T>(ComboBox comboBox, T targetItem, Func<T, int> idSelector)
@@ -483,6 +530,250 @@ public partial class MainWindow : Window
     private async void ComboBoxMonthStatistics_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         ResultNumOfTrainingsPerMonthTextBlock.Text = await Database.CalculateNumTrainingsPerMonth(ComboBoxMonthStatistics.SelectedIndex + 1);
+    }
+
+    private void ToggleSubscriptionFilterButton_Click(object sender, RoutedEventArgs e)
+    {
+        if ((bool)FilterSubscriptionButton.IsChecked!)
+        {
+            FilterSubscriptionBlock.Visibility = Visibility.Visible;
+            return;
+        }
+        FilterSubscriptionBlock.Visibility = Visibility.Collapsed;
+    }
+
+    private async void ApplyFilterSubscriptionButton_Click(object sender, RoutedEventArgs e)
+    {
+        MainWindowViewModel.Subscriptions = await Database.GetSubscriptionsFiltered(
+            FilterSubscriptionType.Text,
+            FilterSubscriptionVisitCount.Text,
+            FilterSubscriptionPrice.Text,
+            FilterSubscriptionStartDate.Text,
+            FilterSubscriptionEndDate.Text,
+            FilterSubscriptionClientName.Text);
+    }
+
+    private async void DataGridSubscription_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+    {
+        if (e.EditAction == DataGridEditAction.Commit)
+        {
+            DataGridRow row = e.Row;
+            Subscription subscription = (Subscription)row.Item;
+
+            if (e.EditingElement is TextBox tb)
+            {
+                string valueNew = tb.Text;
+
+                switch (e.Column.Header.ToString())
+                {
+                    case "Type":
+                        if (!string.IsNullOrWhiteSpace(valueNew))
+                        {
+                            subscription.SubscriptionType = valueNew;
+                        }
+                        else
+                        {
+                            tb.Text = subscription.SubscriptionType ?? string.Empty;
+                        }
+                        break;
+                    case "Visit Count":
+                        if (int.TryParse(valueNew, out int visits))
+                        {
+                            subscription.VisitCount = visits;
+                        }
+                        else
+                        {
+                            tb.Text = subscription.VisitCount.ToString();
+                        }
+                        break;
+                    case "Price":
+                        if (float.TryParse(valueNew, out float price))
+                        {
+                            subscription.Price = price;
+                        }
+                        else
+                        {
+                            tb.Text = subscription.Price.ToString("F2");
+                        }
+                        break;
+                    case "Start Date":
+                        if (DateTime.TryParse(valueNew, out DateTime startDate))
+                        {
+                            subscription.StartDate = startDate;
+                        }
+                        else
+                        {
+                            tb.Text = subscription.StartDate.ToString("yyyy-MM-dd");
+                        }
+                        break;
+                    case "End Date":
+                        if (DateTime.TryParse(valueNew, out DateTime endDate))
+                        {
+                            subscription.EndDate = endDate;
+                        }
+                        else
+                        {
+                            tb.Text = subscription.EndDate.ToString("yyyy-MM-dd");
+                        }
+                        break;
+                }
+
+                // Call Database.UpdateSubscription with updated parameters
+                await Database.UpdateSubscription(
+                    subscription.SubscriptionId,
+                    subscription.SubscriptionType ?? string.Empty,
+                    subscription.VisitCount,
+                    subscription.Price,
+                    subscription.StartDate,
+                    subscription.EndDate,
+                    subscription.ClientId);
+            }
+        }
+    }
+
+    private async void DataGridSubscription_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Delete)
+        {
+            if (sender is DataGrid dataGrid)
+            {
+                foreach (object? row in dataGrid.SelectedItems)
+                {
+                    if (row is Subscription subscription)
+                    {
+                        await Database.DeleteSubscription(subscription.SubscriptionId);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    private void MenuItemSubscription_Click(object sender, RoutedEventArgs e)
+    {
+        CreateSubscriptionWindow createSubscriptionWindow = new()
+        {
+            Owner = this
+        };
+        createSubscriptionWindow.ShowDialog();
+    }
+
+    private void TogglePoolFilterButton_Click(object sender, RoutedEventArgs e)
+    {
+        if ((bool)FilterPoolButton.IsChecked!)
+        {
+            FilterPoolBlock.Visibility = Visibility.Visible;
+            return;
+        }
+        FilterPoolBlock.Visibility = Visibility.Collapsed;
+    }
+
+    private async void ApplyFilterPoolButton_Click(object sender, RoutedEventArgs e)
+    {
+        MainWindowViewModel.Pools = await Database.GetPoolsFiltered(
+            FilterPoolName.Text,
+            FilterPoolLaneCount.Text,
+            FilterPoolLength.Text,
+            FilterPoolDepth.Text,
+            FilterPoolAddress.Text);
+    }
+
+    private async void DataGridPool_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+    {
+        if (e.EditAction == DataGridEditAction.Commit)
+        {
+            DataGridRow row = e.Row;
+            Pool pool = (Pool)row.Item;
+            if (e.EditingElement is TextBox tb)
+            {
+                string valueNew = tb.Text;
+                switch (e.Column.Header.ToString())
+                {
+                    case "Name":
+                        if (!string.IsNullOrWhiteSpace(valueNew))
+                        {
+                            pool.Name = valueNew;
+                            await Database.UpdatePool(pool);
+                        }
+                        else
+                        {
+                            tb.Text = pool.Name;
+                        }
+                        break;
+                    case "Lane Count":
+                        if (int.TryParse(valueNew, out int lanes))
+                        {
+                            pool.LaneCount = lanes;
+                            await Database.UpdatePool(pool);
+                        }
+                        else
+                        {
+                            tb.Text = pool.LaneCount.ToString();
+                        }
+                        break;
+                    case "Length":
+                        if (float.TryParse(valueNew, out float length))
+                        {
+                            pool.Length = length;
+                            await Database.UpdatePool(pool);
+                        }
+                        else
+                        {
+                            tb.Text = pool.Length.ToString("F2");
+                        }
+                        break;
+                    case "Depth":
+                        if (float.TryParse(valueNew, out float depth))
+                        {
+                            pool.Depth = depth;
+                            await Database.UpdatePool(pool);
+                        }
+                        else
+                        {
+                            tb.Text = pool.Depth.ToString("F2");
+                        }
+                        break;
+                    case "Address":
+                        if (!string.IsNullOrWhiteSpace(valueNew))
+                        {
+                            pool.Address = valueNew;
+                            await Database.UpdatePool(pool);
+                        }
+                        else
+                        {
+                            tb.Text = pool.Address;
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+    private async void DataGridPool_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Delete)
+        {
+            if (sender is DataGrid dataGrid)
+            {
+                foreach (object? row in dataGrid.SelectedItems)
+                {
+                    if (row is Pool pool)
+                    {
+                        await Database.DeletePool(pool.PoolId);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    private void MenuItemPool_Click(object sender, RoutedEventArgs e)
+    {
+        CreatePoolWindow createPoolWindow = new()
+        {
+            Owner = this
+        };
+        createPoolWindow.ShowDialog();
     }
 
 }

@@ -11,7 +11,7 @@ public partial class UpdateClientWindow : Window
 
     public UpdateClientWindow() => InitializeComponent();
 
-    public async void Initalize(int clientID)
+    public async void Initialize(int clientID)
     {
         _clientID = clientID;
         _client = await Database.GetClientById(clientID);

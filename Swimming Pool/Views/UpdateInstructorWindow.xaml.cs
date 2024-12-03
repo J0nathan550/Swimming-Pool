@@ -11,7 +11,7 @@ public partial class UpdateInstructorWindow : Window
 
     public UpdateInstructorWindow() => InitializeComponent();
 
-    public async void Initalize(int clientID)
+    public async void Initialize(int clientID)
     {
         _instructorID = clientID;
         _instructor = await Database.GetInstructorById(clientID);

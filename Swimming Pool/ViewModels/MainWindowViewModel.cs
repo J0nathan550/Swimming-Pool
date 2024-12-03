@@ -9,13 +9,17 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<Client> clients = [];
     [ObservableProperty]
-    private ObservableCollection<Client> clientsWithNull = [];
-    [ObservableProperty]
     private ObservableCollection<Instructor> instructors = [];
     [ObservableProperty]
     private ObservableCollection<Instructor> instructorsWithNull = [];
     [ObservableProperty]
     private ObservableCollection<Training> trainings = [];
+    [ObservableProperty]
+    private ObservableCollection<Pool> pools = [];
+    [ObservableProperty]
+    private ObservableCollection<Pool> poolsWithNull = [];
+    [ObservableProperty]
+    private ObservableCollection<Subscription> subscriptions = [];
     [ObservableProperty]
     private Training? selectedTraining;
     [ObservableProperty]

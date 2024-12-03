@@ -8,9 +8,9 @@ public partial class Training
     public int TrainingId { get; set; }
     public DateTime Date { get; set; }
     public string? TrainingType { get; set; }
+    public int PoolId { get; set; }
     public string? PoolName { get; set; }
-    public int ClientId { get; set; }
-    public string? ClientName { get; set; }
+    public string? ClientNames { get; set; }
     public int InstructorId { get; set; }
     public string? InstructorName { get; set; }
 
@@ -21,7 +21,7 @@ public partial class Training
         {
             Owner = MainWindow.MainWindowInstance
         };
-        updateTrainingWindow.Initalize(trainingId);
+        updateTrainingWindow.Initialize(trainingId);
         updateTrainingWindow.ShowDialog();
     }
 }

@@ -19,7 +19,7 @@ public partial class Client
         {
             Owner = MainWindow.MainWindowInstance
         };
-        updateClientWindow.Initalize(clientId);
+        updateClientWindow.Initialize(clientId);
         updateClientWindow.ShowDialog();
     }
 }

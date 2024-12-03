@@ -29,10 +29,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\CreateSubscriptionWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\CreatePoolWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\CreateTrainingWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\CreateInstructorWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\UpdateSubscriptionWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\UpdatePoolWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\UpdateTrainingWindow.xaml.cs">

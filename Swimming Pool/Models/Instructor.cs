@@ -20,7 +20,7 @@ public partial class Instructor
         {
             Owner = MainWindow.MainWindowInstance
         };
-        updateInstructorWindow.Initalize(instructorId);
+        updateInstructorWindow.Initialize(instructorId);
         updateInstructorWindow.ShowDialog();
     }
 }

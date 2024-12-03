@@ -7,8 +7,8 @@ namespace Swimming_Pool.Views;
 
 public partial class UpdateTrainingWindow : Window
 {
-    private CreateUpdateTrainingViewModel createTrainingViewModel = new();
-    public CreateUpdateTrainingViewModel CreateTrainingViewModel { get => createTrainingViewModel; set => createTrainingViewModel = value; }
+    private static CreateUpdateTrainingViewModel createUpdateTrainingViewModel = new();
+    public static CreateUpdateTrainingViewModel CreateTrainingViewModel { get => createUpdateTrainingViewModel; set => createUpdateTrainingViewModel = value; }
 
     private Training? _training;
     private int _trainingID = -1;
@@ -19,19 +19,20 @@ public partial class UpdateTrainingWindow : Window
         InitializeComponent();
     }
 
-    public async void Initalize(int trainingID)
+    public async void Initialize(int trainingID)
     {
         DateTimePicker.Value = DateTime.Now;
+        CreateTrainingViewModel.ClientsTrainings = await Database.GetAllEnrollments(trainingID);
         CreateTrainingViewModel.Clients = await Database.GetAllClients();
         CreateTrainingViewModel.Instructors = await Database.GetAllInstructors();
+        CreateTrainingViewModel.Pools = await Database.GetAllPools();
         _trainingID = trainingID;
         _training = await Database.GetTrainingById(trainingID);
-        PoolNameTextBox.Text = _training!.PoolName;
-        TrainingTypeTextBox.Text = _training.TrainingType;
-        Client? client = await Database.GetClientById(_training.ClientId);
+        TrainingTypeTextBox.Text = _training!.TrainingType;
         Instructor? instructor = await Database.GetInstructorById(_training.InstructorId);
-        SelectItemById(ClientComboBox, client, c => c!.ClientId);
+        Pool? pool = await Database.GetPoolById(_training.PoolId);
         SelectItemById(InstructorComboBox, instructor, i => i!.InstructorId);
+        SelectItemById(PoolComboBox, pool, i => i!.PoolId);
     }
 
     public static void SelectItemById<T>(ComboBox comboBox, T targetItem, Func<T, int> idSelector)
@@ -64,7 +65,7 @@ public partial class UpdateTrainingWindow : Window
         }
         Client client = (Client)ClientComboBox.SelectedItem;
         Instructor instructor = (Instructor)InstructorComboBox.SelectedItem;
-        await Database.UpdateTraining(_trainingID, dateTime, TrainingTypeTextBox.Text, PoolNameTextBox.Text, client.ClientId, instructor.InstructorId);
+        //await Database.UpdateTraining(_trainingID, dateTime, TrainingTypeTextBox.Text, PoolNameTextBox.Text, client.ClientId, instructor.InstructorId);
         MainWindow.MainWindowViewModel.Trainings = await Database.GetAllTrainings();
         Close();
     }
@@ -85,11 +86,6 @@ public partial class UpdateTrainingWindow : Window
             isOkay = false;
         }
 
-        if (string.IsNullOrWhiteSpace(PoolNameTextBox.Text))
-        {
-            isOkay = false;
-        }
-
         UpdateTrainingButton.IsEnabled = isOkay;
         return isOkay;
     }
@@ -104,5 +100,17 @@ public partial class UpdateTrainingWindow : Window
             MainWindow.MainWindowViewModel.Trainings = await Database.GetAllTrainings();
             Close();
         }
+    }
+
+    private async void AddClientButton_Click(object sender, RoutedEventArgs e)
+    {
+        Client client = (Client)ClientComboBox.SelectedItem;
+        if (await Database.CheckIfEnrollmentContainsClientAsync(_trainingID, client.ClientId))
+        {
+            await Database.AddEnrollmentAsync(_trainingID, client.ClientId);
+            createUpdateTrainingViewModel.ClientsTrainings = await Database.GetAllEnrollments(_trainingID);
+            return;
+        }
+        MessageBox.Show($"Client - {client.FirstName} already exists and will not be added.", "Warning!", MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 }

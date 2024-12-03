@@ -185,6 +185,102 @@
             Name="TabControlView"
             Grid.Row="1"
             SelectionChanged="TabControl_SelectionChanged">
+            <TabItem Header="Subscription">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <!--  Add Subscription Menu  -->
+                    <Menu>
+                        <MenuItem Click="MenuItemSubscription_Click" Header="Add Subscription" />
+                    </Menu>
+                    <!--  Filter Toggle Button  -->
+                    <ToggleButton
+                        Name="FilterSubscriptionButton"
+                        Width="17"
+                        Height="17"
+                        HorizontalAlignment="Right"
+                        Click="ToggleSubscriptionFilterButton_Click">
+                        <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Icons/filter.png" />
+                    </ToggleButton>
+                    <!--  Filter Panel  -->
+                    <Grid
+                        Name="FilterSubscriptionBlock"
+                        Grid.Row="1"
+                        Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <extended:WatermarkTextBox
+                            Name="FilterSubscriptionType"
+                            Grid.Column="0"
+                            Watermark="Subscription Type Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterSubscriptionVisitCount"
+                            Grid.Column="1"
+                            Watermark="Visit Count Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterSubscriptionPrice"
+                            Grid.Column="2"
+                            Watermark="Price Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterSubscriptionStartDate"
+                            Grid.Column="3"
+                            Watermark="Start Date Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterSubscriptionEndDate"
+                            Grid.Column="4"
+                            Watermark="End Date Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterSubscriptionClientName"
+                            Grid.Column="5"
+                            Watermark="Client Name Filter..." />
+                        <Button
+                            Grid.Column="6"
+                            Width="17"
+                            Click="ApplyFilterSubscriptionButton_Click">
+                            <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Icons/checkmark.png" />
+                        </Button>
+                    </Grid>
+                    <!--  Subscription DataGrid  -->
+                    <DataGrid
+                        Grid.Row="2"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        CellEditEnding="DataGridSubscription_CellEditEnding"
+                        ItemsSource="{Binding Subscriptions}"
+                        PreviewKeyDown="DataGridSubscription_PreviewKeyDown">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding SubscriptionType}" Header="Type" />
+                            <DataGridTextColumn Binding="{Binding VisitCount}" Header="Visit Count" />
+                            <DataGridTextColumn Binding="{Binding PriceAsString}" Header="Price" />
+                            <DataGridTextColumn Binding="{Binding StartDate}" Header="Start Date" />
+                            <DataGridTextColumn Binding="{Binding EndDate}" Header="End Date" />
+                            <DataGridTextColumn
+                                Binding="{Binding ClientName}"
+                                Header="Client Name"
+                                IsReadOnly="True" />
+                            <DataGridTemplateColumn Header="Edit">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding UpdateSubscriptionCommand}" CommandParameter="{Binding SubscriptionId}">
+                                            <TextBlock Text="Edit Subscription" />
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
             <TabItem Header="Clients">
                 <Grid Background="#FFE5E5E5">
                     <Grid.RowDefinitions>
@@ -412,21 +508,20 @@
                             Grid.Column="3"
                             Watermark="Training Type Filter..." />
                         <extended:WatermarkTextBox
-                            Name="FilterTrainingPoolName"
+                            Name="FilterTrainingClientNames"
                             Grid.Column="4"
-                            Watermark="Pool Name Filter..." />
+                            Watermark="Client Names Filter..." />
                         <ComboBox
-                            Name="FilterTrainingClientComboBox"
+                            Name="FilterTrainingPoolComboBox"
                             Grid.Column="5"
-                            ItemsSource="{Binding ClientsWithNull}"
+                            ItemsSource="{Binding PoolsWithNull}"
                             SelectedIndex="0"
                             SelectedValuePath="Id">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock>
-                                        <Run Text="{Binding ClientId}" />
-                                        <Run Text="{Binding FirstName}" />
-                                        <Run Text="{Binding LastName}" />
+                                        <Run Text="{Binding PoolId}" />
+                                        <Run Text="{Binding Name}" />
                                     </TextBlock>
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
@@ -466,11 +561,21 @@
                             <DataGrid.Columns>
                                 <DataGridTextColumn Binding="{Binding Date, Mode=TwoWay, StringFormat='yyyy-MM-dd HH:mm'}" Header="Date" />
                                 <DataGridTextColumn Binding="{Binding TrainingType}" Header="Training Type" />
-                                <DataGridTextColumn Binding="{Binding PoolName}" Header="Pool Name" />
                                 <DataGridTextColumn
-                                    Binding="{Binding ClientName}"
-                                    Header="Client Name"
+                                    Binding="{Binding PoolName}"
+                                    Header="Pool Name"
                                     IsReadOnly="True" />
+                                <DataGridTextColumn
+                                    MaxWidth="250"
+                                    Binding="{Binding ClientNames}"
+                                    Header="Client Names"
+                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="{x:Type TextBlock}">
+                                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                                 <DataGridTextColumn
                                     Binding="{Binding InstructorName}"
                                     Header="Instructor Name"
@@ -487,6 +592,93 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Pool">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <!--  Add Pool Menu  -->
+                    <Menu>
+                        <MenuItem Click="MenuItemPool_Click" Header="Add Pool" />
+                    </Menu>
+                    <!--  Filter Toggle Button  -->
+                    <ToggleButton
+                        Name="FilterPoolButton"
+                        Width="17"
+                        Height="17"
+                        HorizontalAlignment="Right"
+                        Click="TogglePoolFilterButton_Click">
+                        <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Icons/filter.png" />
+                    </ToggleButton>
+                    <!--  Filter Panel  -->
+                    <Grid
+                        Name="FilterPoolBlock"
+                        Grid.Row="1"
+                        Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <extended:WatermarkTextBox
+                            Name="FilterPoolName"
+                            Grid.Column="0"
+                            Watermark="Name Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterPoolLaneCount"
+                            Grid.Column="1"
+                            Watermark="Lane Count Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterPoolLength"
+                            Grid.Column="2"
+                            Watermark="Length Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterPoolDepth"
+                            Grid.Column="3"
+                            Watermark="Depth Filter..." />
+                        <extended:WatermarkTextBox
+                            Name="FilterPoolAddress"
+                            Grid.Column="4"
+                            Watermark="Address Filter..." />
+                        <Button
+                            Grid.Column="5"
+                            Width="17"
+                            Click="ApplyFilterPoolButton_Click">
+                            <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Icons/checkmark.png" />
+                        </Button>
+                    </Grid>
+                    <!--  Pool DataGrid  -->
+                    <DataGrid
+                        Grid.Row="2"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        CellEditEnding="DataGridPool_CellEditEnding"
+                        ItemsSource="{Binding Pools}"
+                        PreviewKeyDown="DataGridPool_PreviewKeyDown">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Name}" Header="Name" />
+                            <DataGridTextColumn Binding="{Binding LaneCount}" Header="Lane Count" />
+                            <DataGridTextColumn Binding="{Binding LengthAsString}" Header="Length" />
+                            <DataGridTextColumn Binding="{Binding DepthAsString}" Header="Depth" />
+                            <DataGridTextColumn Binding="{Binding Address}" Header="Address" />
+                            <DataGridTemplateColumn Header="Edit">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding UpdatePoolCommand}" CommandParameter="{Binding PoolId}">
+                                            <TextBlock Text="Edit Pool" />
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </TabItem>
         </TabControl>
