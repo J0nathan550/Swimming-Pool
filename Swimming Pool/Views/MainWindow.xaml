@@ -195,6 +195,7 @@
                     <!--  Add Subscription Menu  -->
                     <Menu>
                         <MenuItem Click="MenuItemSubscription_Click" Header="Add Subscription" />
+                        <MenuItem Click="MenuItemSubscriptionExportPDF_Click" Header="Export PDF..." />
                     </Menu>
                     <!--  Filter Toggle Button  -->
                     <ToggleButton
@@ -290,6 +291,7 @@
                     </Grid.RowDefinitions>
                     <Menu>
                         <MenuItem Click="MenuItemClient_Click" Header="Add Client" />
+                        <MenuItem Click="MenuItemClientExportPDF_Click" Header="Export PDF..." />
                     </Menu>
                     <ToggleButton
                         Name="FilterClientButton"
@@ -373,6 +375,7 @@
                     </Grid.RowDefinitions>
                     <Menu>
                         <MenuItem Click="MenuItemInstructor_Click" Header="Add Instructor" />
+                        <MenuItem Click="MenuItemInstructorExportPDF_Click" Header="Export PDF..." />
                     </Menu>
                     <ToggleButton
                         Name="FilterInstructorButton"
@@ -462,6 +465,7 @@
                     </Grid.RowDefinitions>
                     <Menu>
                         <MenuItem Click="MenuItemTraining_Click" Header="Add Training" />
+                        <MenuItem Click="MenuItemTrainingExportPDF_Click" Header="Export PDF..." />
                     </Menu>
                     <ToggleButton
                         Name="FilterTrainingButton"
@@ -604,6 +608,7 @@
                     <!--  Add Pool Menu  -->
                     <Menu>
                         <MenuItem Click="MenuItemPool_Click" Header="Add Pool" />
+                        <MenuItem Click="MenuItemPoolExportPDF_Click" Header="Export PDF..." />
                     </Menu>
                     <!--  Filter Toggle Button  -->
                     <ToggleButton

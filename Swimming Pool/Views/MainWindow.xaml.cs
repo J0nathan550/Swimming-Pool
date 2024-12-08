@@ -1,5 +1,8 @@
-﻿using Swimming_Pool.Models;
+﻿using Microsoft.Win32;
+using QuestPDF.Fluent;
+using Swimming_Pool.Models;
 using Swimming_Pool.ViewModels;
+using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,6 +22,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
         DataContext = MainWindowViewModel;
         InitializeComponent();
         MainWindowInstance = this;
@@ -776,4 +780,245 @@ public partial class MainWindow : Window
         createPoolWindow.ShowDialog();
     }
 
+    private void MenuItemSubscriptionExportPDF_Click(object sender, RoutedEventArgs e)
+    {
+        Document pdfDocument = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Header().Text("Список абонементів").FontSize(24).Bold().AlignCenter();
+                page.Content().Column(col =>
+                {
+                    // Додавання інформації про абонементи
+                    page.Margin(25);
+                    foreach (Subscription subscription in mainWindowViewModel.Subscriptions)
+                    {
+                        col.Item().Text($"Тип: {subscription.SubscriptionType}").FontSize(14);
+                        col.Item().Text($"Кількість відвідувань: {subscription.VisitCount}").FontSize(14);
+                        col.Item().Text($"Ціна: {subscription.PriceAsString}").FontSize(14);
+                        col.Item().Text($"Початок: {subscription.StartDate:dd.MM.yyyy}").FontSize(14);
+                        col.Item().Text($"Кінець: {subscription.EndDate:dd.MM.yyyy}").FontSize(14);
+                        col.Item().Text($"Клієнт: {subscription.ClientName}").FontSize(14);
+                        col.Item().Text("");
+                    }
+                });
+            });
+        });
+        OpenFolderDialog openFileDialog = new()
+        {
+            Title = "Оберіть шлях експорту PDF за результатами Абонементів"
+        };
+        openFileDialog.ShowDialog();
+
+        if (string.IsNullOrEmpty(openFileDialog.FolderName))
+        {
+            return;
+        }
+
+        pdfDocument.GeneratePdf(openFileDialog.FolderName + $"\\Абонементи - {DateTime.Now:yyyy-MM-dd_HH-mm-ss}.pdf");
+       
+        MessageBoxResult result = MessageBox.Show("Файл було успішно створено!\nЧи хочете ви відчинити папку де знаходится файл?", "PDF Експорт - Абонементи", MessageBoxButton.YesNo, MessageBoxImage.Information);
+        if (result == MessageBoxResult.Yes)
+        {
+            Process.Start("explorer.exe", openFileDialog.FolderName);
+        }
+    }
+
+    private void MenuItemClientExportPDF_Click(object sender, RoutedEventArgs e)
+    {
+        Document pdfDocument = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Header().Text("Список клієнтів").FontSize(24).Bold().AlignCenter();
+                page.Content().Column(col =>
+                {
+                    page.Margin(25);
+                    foreach (Client client in mainWindowViewModel.Clients)
+                    {
+                        col.Item().Text($"Ім'я: {client.FirstName}").FontSize(14);
+                        col.Item().Text($"Прізвище: {client.LastName}").FontSize(14);
+                        col.Item().Text($"Вік: {client.Age}").FontSize(14);
+                        col.Item().Text($"Телефон: {client.PhoneNumber}").FontSize(14);
+                        col.Item().Text($"Електронна пошта: {client.EmailAddress}").FontSize(14);
+                        col.Item().Text(""); 
+                    }
+                });
+            });
+        });
+
+        OpenFolderDialog openFileDialog = new()
+        {
+            Title = "Оберіть шлях експорту PDF за результатами Клієнтів"
+        };
+        openFileDialog.ShowDialog();
+
+        if (string.IsNullOrEmpty(openFileDialog.FolderName))
+        {
+            return;
+        }
+
+        pdfDocument.GeneratePdf(openFileDialog.FolderName + $"\\Клієнти - {DateTime.Now:yyyy-MM-dd_HH-mm-ss}.pdf");
+
+        MessageBoxResult result = MessageBox.Show(
+            "Файл було успішно створено!\nЧи хочете ви відчинити папку де знаходиться файл?",
+            "PDF Експорт - Клієнти",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Information
+        );
+
+        if (result == MessageBoxResult.Yes)
+        {
+            Process.Start("explorer.exe", openFileDialog.FolderName);
+        }
+    }
+
+    private void MenuItemInstructorExportPDF_Click(object sender, RoutedEventArgs e)
+    {
+        Document pdfDocument = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Header().Text("Список інструкторів").FontSize(24).Bold().AlignCenter();
+                page.Content().Column(col =>
+                {
+                    page.Margin(25);
+                    foreach (Instructor instructor in mainWindowViewModel.Instructors)
+                    {
+                        col.Item().Text($"Ім'я: {instructor.FirstName}").FontSize(14);
+                        col.Item().Text($"Прізвище: {instructor.LastName}").FontSize(14);
+                        col.Item().Text($"Вік: {instructor.Age}").FontSize(14);
+                        col.Item().Text($"Телефон: {instructor.PhoneNumber}").FontSize(14);
+                        col.Item().Text($"Електронна пошта: {instructor.EmailAddress}").FontSize(14);
+                        col.Item().Text($"Спеціалізація: {instructor.Specialization}").FontSize(14);
+                        col.Item().Text("");
+                    }
+                });
+            });
+        });
+
+        OpenFolderDialog openFileDialog = new()
+        {
+            Title = "Оберіть шлях експорту PDF за результатами Інструкторів"
+        };
+        openFileDialog.ShowDialog();
+
+        if (string.IsNullOrEmpty(openFileDialog.FolderName))
+        {
+            return;
+        }
+
+        pdfDocument.GeneratePdf(openFileDialog.FolderName + $"\\Інструктори - {DateTime.Now:yyyy-MM-dd_HH-mm-ss}.pdf");
+
+        MessageBoxResult result = MessageBox.Show(
+            "Файл було успішно створено!\nЧи хочете ви відчинити папку де знаходиться файл?",
+            "PDF Експорт - Інструктори",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Information
+        );
+
+        if (result == MessageBoxResult.Yes)
+        {
+            Process.Start("explorer.exe", openFileDialog.FolderName);
+        }
+
+    }
+
+    private void MenuItemTrainingExportPDF_Click(object sender, RoutedEventArgs e)
+    {
+        Document pdfDocument = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Header().Text("Список тренувань").FontSize(24).Bold().AlignCenter();
+                page.Content().Column(col =>
+                {
+                    page.Margin(25);
+                    foreach (Training training in mainWindowViewModel.Trainings)
+                    {
+                        col.Item().Text($"Дата: {training.Date:dd.MM.yyyy HH:mm}").FontSize(14);
+                        col.Item().Text($"Тип тренування: {training.TrainingType}").FontSize(14);
+                        col.Item().Text($"Басейн: {training.PoolName}").FontSize(14);
+                        col.Item().Text($"Інструктор: {training.InstructorName}").FontSize(14);
+                        col.Item().Text($"Клієнти: {training.ClientNames}").FontSize(14);
+                        col.Item().Text("");
+                    }
+                });
+            });
+        });
+
+        OpenFolderDialog openFileDialog = new()
+        {
+            Title = "Оберіть шлях експорту PDF за результатами Тренувань"
+        };
+        openFileDialog.ShowDialog();
+
+        if (string.IsNullOrEmpty(openFileDialog.FolderName))
+        {
+            return;
+        }
+
+        pdfDocument.GeneratePdf(openFileDialog.FolderName + $"\\Тренування - {DateTime.Now:yyyy-MM-dd_HH-mm-ss}.pdf");
+
+        MessageBoxResult result = MessageBox.Show(
+            "Файл було успішно створено!\nЧи хочете ви відчинити папку де знаходиться файл?",
+            "PDF Експорт - Тренування",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Information
+        );
+
+        if (result == MessageBoxResult.Yes)
+        {
+            Process.Start("explorer.exe", openFileDialog.FolderName);
+        }
+    }
+
+    private void MenuItemPoolExportPDF_Click(object sender, RoutedEventArgs e)
+    {
+        Document pdfDocument = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Header().Text("Список басейнів").FontSize(24).Bold().AlignCenter();
+                page.Content().Column(col =>
+                {
+                    page.Margin(25);
+                    foreach (Pool pool in mainWindowViewModel.Pools)
+                    {
+                        col.Item().Text($"Назва: {pool.Name}").FontSize(14);
+                        col.Item().Text($"Кількість доріжок: {pool.LaneCount}").FontSize(14);
+                        col.Item().Text($"Довжина: {pool.LengthAsString} м").FontSize(14);
+                        col.Item().Text($"Глибина: {pool.DepthAsString} м").FontSize(14);
+                        col.Item().Text($"Адреса: {pool.Address}").FontSize(14);
+                        col.Item().Text("");
+                    }
+                });
+            });
+        });
+
+        OpenFolderDialog openFileDialog = new()
+        {
+            Title = "Оберіть шлях експорту PDF за результатами Басейнів"
+        };
+        openFileDialog.ShowDialog();
+
+        if (string.IsNullOrEmpty(openFileDialog.FolderName))
+        {
+            return;
+        }
+        
+        pdfDocument.GeneratePdf(openFileDialog.FolderName + $"\\Басейни - {DateTime.Now:yyyy-MM-dd_HH-mm-ss}.pdf");
+
+        MessageBoxResult result = MessageBox.Show(
+            "Файл було успішно створено!\nЧи хочете ви відчинити папку де знаходиться файл?",
+            "PDF Експорт - Басейни",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Information
+        );
+
+        if (result == MessageBoxResult.Yes)
+        {
+            Process.Start("explorer.exe", openFileDialog.FolderName);
+        }
+    }
 }
