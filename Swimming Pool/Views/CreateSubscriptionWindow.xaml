@@ -32,7 +32,6 @@
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
-                    <RowDefinition />
                 </Grid.RowDefinitions>
                 <TextBlock
                     Grid.Row="0"
@@ -41,27 +40,22 @@
                 <TextBlock
                     Grid.Row="1"
                     Margin="10,5,0,0"
-                    Text="Visit Count:" />
+                    Text="Price:" />
                 <TextBlock
                     Grid.Row="2"
                     Margin="10,5,0,0"
-                    Text="Price:" />
+                    Text="Start Date:" />
                 <TextBlock
                     Grid.Row="3"
                     Margin="10,5,0,0"
-                    Text="Start Date:" />
-                <TextBlock
-                    Grid.Row="4"
-                    Margin="10,5,0,0"
                     Text="End Date:" />
                 <TextBlock
-                    Grid.Row="5"
+                    Grid.Row="4"
                     Margin="10,5,0,0"
                     Text="Client:" />
             </Grid>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
@@ -74,28 +68,23 @@
                     Margin="10"
                     TextChanged="TextBox_TextChanged" />
                 <TextBox
-                    Name="VisitCountTextBox"
-                    Grid.Row="1"
-                    Margin="10"
-                    TextChanged="TextBox_TextChanged" />
-                <TextBox
                     Name="PriceTextBox"
-                    Grid.Row="2"
+                    Grid.Row="1"
                     Margin="10"
                     TextChanged="TextBox_TextChanged" />
                 <extended:DateTimePicker
                     Name="StartDatePicker"
-                    Grid.Row="3"
+                    Grid.Row="2"
                     Margin="10"
                     FormatString="yyyy-MM-dd" />
                 <extended:DateTimePicker
                     Name="EndDatePicker"
-                    Grid.Row="4"
+                    Grid.Row="3"
                     Margin="10"
                     FormatString="yyyy-MM-dd" />
                 <ComboBox
                     Name="ClientComboBox"
-                    Grid.Row="5"
+                    Grid.Row="4"
                     Margin="10,5,10,10"
                     ItemsSource="{Binding Clients}"
                     SelectedIndex="0">

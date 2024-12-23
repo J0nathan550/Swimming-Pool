@@ -20,167 +20,9 @@
         </Grid.RowDefinitions>
         <Menu>
             <MenuItem Header="File">
-                <MenuItem
-                    Name="MenuItemQueryEditor"
-                    Click="MenuItemAppQueryEditor_Click"
-                    Header="Query Editor" />
                 <MenuItem Click="MenuItemApp_Click" Header="Exit" />
             </MenuItem>
-            <MenuItem
-                Name="MenuItemStatistics"
-                Click="MenuItemAppStatistics_Click"
-                Header="Statistics" />
         </Menu>
-        <Grid
-            Name="StatisticsGrid"
-            Grid.Row="1"
-            Grid.RowSpan="2"
-            Margin="5"
-            Visibility="Collapsed">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="5" />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    HorizontalAlignment="Right"
-                    Text="Average Age of Clients:" />
-                <TextBlock
-                    Name="TextBlockResultAgeClient"
-                    Grid.Row="0"
-                    Grid.Column="2"
-                    Text="Result Age Client" />
-                <TextBlock
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    HorizontalAlignment="Right"
-                    Text="Average Age of Instructor:" />
-                <TextBlock
-                    Name="TextBlockResultAgeInstructor"
-                    Grid.Row="1"
-                    Grid.Column="2"
-                    Text="Result Age instructor" />
-                <StackPanel Grid.Row="2" Grid.Column="0">
-                    <TextBlock HorizontalAlignment="Right" Text="Number of clients per instructor:" />
-                    <ComboBox
-                        Name="StatisticsComboBoxNumClients"
-                        ItemsSource="{Binding Instructors}"
-                        SelectedIndex="0"
-                        SelectedValuePath="Id"
-                        SelectionChanged="ComboBoxStatisticsNumClients_SelectionChanged">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock>
-                                    <Run Text="{Binding InstructorId}" />
-                                    <Run Text="{Binding FirstName}" />
-                                    <Run Text="{Binding LastName}" />
-                                </TextBlock>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </StackPanel>
-                <TextBlock
-                    Name="ResultNumClientsTextBlock"
-                    Grid.Row="2"
-                    Grid.Column="2"
-                    Text="Result num clients" />
-                <StackPanel Grid.Row="3" Grid.Column="0">
-                    <TextBlock HorizontalAlignment="Right" Text="Number of trainings per month:" />
-                    <ComboBox Name="ComboBoxMonthStatistics" SelectionChanged="ComboBoxMonthStatistics_SelectionChanged">
-                        <ComboBoxItem Content="1" />
-                        <ComboBoxItem Content="2" />
-                        <ComboBoxItem Content="3" />
-                        <ComboBoxItem Content="4" />
-                        <ComboBoxItem Content="5" />
-                        <ComboBoxItem Content="6" />
-                        <ComboBoxItem Content="7" />
-                        <ComboBoxItem Content="8" />
-                        <ComboBoxItem Content="9" />
-                        <ComboBoxItem Content="10" />
-                        <ComboBoxItem Content="11" />
-                        <ComboBoxItem Content="12" />
-                    </ComboBox>
-                </StackPanel>
-                <TextBlock
-                    Name="ResultNumOfTrainingsPerMonthTextBlock"
-                    Grid.Row="3"
-                    Grid.Column="2"
-                    Text="Result num of trainings per month" />
-                <Button
-                    Grid.Row="4"
-                    Grid.Column="0"
-                    Margin="0,5,0,0"
-                    Click="ExitQueryEditor_Click">
-                    <TextBlock Text="Close statistics" />
-                </Button>
-            </Grid>
-        </Grid>
-        <Grid
-            Name="QueryEditorGrid"
-            Grid.Row="1"
-            Grid.RowSpan="2"
-            Visibility="Collapsed">
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition Height="2*" />
-            </Grid.RowDefinitions>
-            <Grid Margin="5,5,0,5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*" />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <TextBox
-                    Name="SQLQueryTextBox"
-                    AcceptsReturn="True"
-                    AcceptsTab="True"
-                    Text="SELECT * FROM client" />
-                <Grid Grid.Column="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <Button
-                        Margin="5,0,5,5"
-                        Padding="9.1"
-                        Click="ExecuteSQLButton_Click">
-                        <TextBlock Text="Execute SQL" />
-                    </Button>
-                    <Button
-                        Grid.Row="1"
-                        Margin="5,0,5,0"
-                        Padding="9.1"
-                        Click="ClearSQLBox_Click">
-                        <TextBlock Text="Clear" />
-                    </Button>
-                    <Button
-                        Grid.Row="2"
-                        Margin="5,5,5,0"
-                        Padding="9.1"
-                        Click="ExitQueryEditor_Click">
-                        <TextBlock Text="Exit" />
-                    </Button>
-                </Grid>
-            </Grid>
-            <DataGrid
-                Name="QueryResultDataGrid"
-                Grid.Row="1"
-                Margin="5"
-                AutoGenerateColumns="True"
-                CanUserAddRows="False"
-                CanUserDeleteRows="False"
-                IsReadOnly="True" />
-        </Grid>
         <TabControl
             Name="TabControlView"
             Grid.Row="1"
@@ -225,10 +67,6 @@
                             Grid.Column="0"
                             Watermark="Subscription Type Filter..." />
                         <extended:WatermarkTextBox
-                            Name="FilterSubscriptionVisitCount"
-                            Grid.Column="1"
-                            Watermark="Visit Count Filter..." />
-                        <extended:WatermarkTextBox
                             Name="FilterSubscriptionPrice"
                             Grid.Column="2"
                             Watermark="Price Filter..." />
@@ -256,12 +94,9 @@
                         Grid.Row="2"
                         AutoGenerateColumns="False"
                         CanUserAddRows="False"
-                        CellEditEnding="DataGridSubscription_CellEditEnding"
-                        ItemsSource="{Binding Subscriptions}"
-                        PreviewKeyDown="DataGridSubscription_PreviewKeyDown">
+                        ItemsSource="{Binding Subscriptions}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Binding="{Binding SubscriptionType}" Header="Type" />
-                            <DataGridTextColumn Binding="{Binding VisitCount}" Header="Visit Count" />
                             <DataGridTextColumn Binding="{Binding PriceAsString}" Header="Price" />
                             <DataGridTextColumn Binding="{Binding StartDate}" Header="Start Date" />
                             <DataGridTextColumn Binding="{Binding EndDate}" Header="End Date" />
@@ -344,9 +179,7 @@
                         Grid.Row="2"
                         AutoGenerateColumns="False"
                         CanUserAddRows="False"
-                        CellEditEnding="DataGridClient_CellEditEnding"
-                        ItemsSource="{Binding Clients}"
-                        PreviewKeyDown="DataGridClient_PreviewKeyDown">
+                        ItemsSource="{Binding Clients}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Binding="{Binding FirstName}" Header="First Name" />
                             <DataGridTextColumn Binding="{Binding LastName}" Header="Last Name" />
@@ -433,9 +266,7 @@
                         Grid.Row="2"
                         AutoGenerateColumns="False"
                         CanUserAddRows="False"
-                        CellEditEnding="DataGridInstructor_CellEditEnding"
-                        ItemsSource="{Binding Instructors}"
-                        PreviewKeyDown="DataGridInstructor_PreviewKeyDown">
+                        ItemsSource="{Binding Instructors}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Binding="{Binding FirstName}" Header="First Name" />
                             <DataGridTextColumn Binding="{Binding LastName}" Header="Last Name" />
@@ -558,10 +389,7 @@
                             Margin="0,0,1,0"
                             AutoGenerateColumns="False"
                             CanUserAddRows="False"
-                            CellEditEnding="DataGridTraining_CellEditEnding"
-                            ItemsSource="{Binding Trainings}"
-                            PreviewKeyDown="DataGridTraining_PreviewKeyDown"
-                            SelectionChanged="DataGridTraining_SelectionChanged">
+                            ItemsSource="{Binding Trainings}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Binding="{Binding Date, Mode=TwoWay, StringFormat='yyyy-MM-dd HH:mm'}" Header="Date" />
                                 <DataGridTextColumn Binding="{Binding TrainingType}" Header="Training Type" />
@@ -664,9 +492,7 @@
                         Grid.Row="2"
                         AutoGenerateColumns="False"
                         CanUserAddRows="False"
-                        CellEditEnding="DataGridPool_CellEditEnding"
-                        ItemsSource="{Binding Pools}"
-                        PreviewKeyDown="DataGridPool_PreviewKeyDown">
+                        ItemsSource="{Binding Pools}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Binding="{Binding Name}" Header="Name" />
                             <DataGridTextColumn Binding="{Binding LaneCount}" Header="Lane Count" />

@@ -11,7 +11,7 @@ public static class Database
 
     #region Subscription Queries
 
-    public static async Task<ObservableCollection<Subscription>> GetSubscriptionsFiltered(string subscriptionType, string visitCount, string price, string startDate, string endDate, string clientName)
+    public static async Task<ObservableCollection<Subscription>> GetSubscriptionsFiltered(string subscriptionType, string price, string startDate, string endDate, string clientName)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
 
@@ -21,8 +21,6 @@ public static class Database
         // Add filters based on the inputs
         if (!string.IsNullOrEmpty(subscriptionType))
             sql += " AND subscription_type LIKE @SubscriptionType";
-        if (!string.IsNullOrEmpty(visitCount))
-            sql += " AND visit_count LIKE @VisitCount";
         if (!string.IsNullOrEmpty(price))
             sql += " AND price LIKE @Price";
         if (!string.IsNullOrEmpty(startDate))
@@ -41,7 +39,6 @@ public static class Database
         IEnumerable<Subscription> subscriptions = await connection.QueryAsync<Subscription>(sql, new
         {
             SubscriptionType = $"%{subscriptionType}%",
-            VisitCount = $"%{visitCount}%",
             Price = $"%{price}%",
             StartDate = $"%{startDate}%",
             EndDate = $"%{endDate}%",
@@ -75,15 +72,14 @@ public static class Database
         return new ObservableCollection<Subscription>(subscriptions);
     }
 
-    public static async Task CreateSubscription(string subscriptionType, int visitCount, float price, DateTime startDate, DateTime endDate, int clientId)
+    public static async Task CreateSubscription(string subscriptionType, float price, DateTime startDate, DateTime endDate, int clientId)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
-        string sql = @"INSERT INTO subscription (subscription_type, visit_count, price, start_date, end_date, client_id)
-                   VALUES (@SubscriptionType, @VisitCount, @Price, @StartDate, @EndDate, @ClientId)";
+        string sql = @"INSERT INTO subscription (subscription_type, price, start_date, end_date, client_id)
+                   VALUES (@SubscriptionType, @Price, @StartDate, @EndDate, @ClientId)";
         await connection.ExecuteAsync(sql, new
         {
             SubscriptionType = subscriptionType,
-            VisitCount = visitCount,
             Price = price,
             StartDate = startDate,
             EndDate = endDate,
@@ -91,12 +87,11 @@ public static class Database
         });
     }
 
-    public static async Task UpdateSubscription(int subscriptionId, string subscriptionType, int visitCount, float price, DateTime startDate, DateTime endDate, int clientId)
+    public static async Task UpdateSubscription(int subscriptionId, string subscriptionType, float price, DateTime startDate, DateTime endDate, int clientId)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
         string sql = @"UPDATE subscription 
                    SET subscription_type = @SubscriptionType, 
-                       visit_count = @VisitCount, 
                        price = @Price, 
                        start_date = @StartDate, 
                        end_date = @EndDate, 
@@ -106,7 +101,6 @@ public static class Database
         {
             SubscriptionId = subscriptionId,
             SubscriptionType = subscriptionType,
-            VisitCount = visitCount,
             Price = price,
             StartDate = startDate,
             EndDate = endDate,

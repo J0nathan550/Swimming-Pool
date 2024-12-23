@@ -47,7 +47,6 @@ public partial class CreateSubscriptionWindow : Window
 
         await Database.CreateSubscription(
             SubscriptionTypeTextBox.Text,
-            int.Parse(VisitCountTextBox.Text),
             float.Parse(PriceTextBox.Text),
             startDate,
             endDate,
@@ -64,11 +63,6 @@ public partial class CreateSubscriptionWindow : Window
         bool isOkay = true;
 
         if (string.IsNullOrWhiteSpace(SubscriptionTypeTextBox.Text))
-        {
-            isOkay = false;
-        }
-
-        if (string.IsNullOrWhiteSpace(VisitCountTextBox.Text) || !int.TryParse(VisitCountTextBox.Text, out _))
         {
             isOkay = false;
         }

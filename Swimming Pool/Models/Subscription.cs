@@ -7,7 +7,6 @@ public partial class Subscription
 {
     public int SubscriptionId { get; set; }
     public string? SubscriptionType { get; set; }
-    public int VisitCount { get; set; }
     public float Price { get; set; }
     public string PriceAsString { get => Price.ToString("F2") + "₴"; }
     public DateTime StartDate { get; set; }

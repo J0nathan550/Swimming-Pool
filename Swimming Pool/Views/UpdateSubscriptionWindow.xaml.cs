@@ -29,7 +29,6 @@ public partial class UpdateSubscriptionWindow : Window
 
         // Populate fields with existing subscription data
         SubscriptionTypeTextBox.Text = _subscription!.SubscriptionType;
-        VisitCountTextBox.Text = _subscription.VisitCount.ToString();
         PriceTextBox.Text = _subscription.Price.ToString("F2");
         StartDatePicker.Value = _subscription.StartDate;
         EndDatePicker.Value = _subscription.EndDate;
@@ -69,7 +68,6 @@ public partial class UpdateSubscriptionWindow : Window
         await Database.UpdateSubscription(
             _subscriptionID,
             SubscriptionTypeTextBox.Text,
-            int.Parse(VisitCountTextBox.Text),
             float.Parse(PriceTextBox.Text),
             startDate,
             endDate,
@@ -86,11 +84,6 @@ public partial class UpdateSubscriptionWindow : Window
         bool isOkay = true;
 
         if (string.IsNullOrWhiteSpace(SubscriptionTypeTextBox.Text))
-        {
-            isOkay = false;
-        }
-
-        if (string.IsNullOrWhiteSpace(VisitCountTextBox.Text) || !int.TryParse(VisitCountTextBox.Text, out _))
         {
             isOkay = false;
         }
