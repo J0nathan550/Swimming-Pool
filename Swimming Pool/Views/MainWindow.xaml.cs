@@ -12,7 +12,6 @@ namespace Swimming_Pool.Views;
 public partial class MainWindow : Window
 {
     private static MainWindowViewModel mainWindowViewModel = new();
-
     public static MainWindowViewModel MainWindowViewModel { get => mainWindowViewModel; set => mainWindowViewModel = value; }
     public static MainWindow? MainWindowInstance { get => mainWindow; set => mainWindow = value; }
 
@@ -39,6 +38,7 @@ public partial class MainWindow : Window
             MainWindowViewModel.InstructorsWithNull.Add(nullInstructor);
 
             MainWindowViewModel.Subscriptions = await Database.GetAllSubscriptions();
+            MainWindowViewModel.SubscriptionTypes = await Database.GetAllSubscriptionTypes();
 
             MainWindowViewModel.Pools = await Database.GetAllPools();
             MainWindowViewModel.PoolsWithNull = [..MainWindowViewModel.Pools];
@@ -103,24 +103,6 @@ public partial class MainWindow : Window
                 t.InstructorId
             );
             MainWindowViewModel.Trainings = await Database.GetAllTrainings();
-        }
-    }
-
-    private async void DataGridInstructor_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Delete)
-        {
-            if (sender is DataGrid dataGrid)
-            {
-                foreach (object? row in dataGrid.SelectedItems)
-                {
-                    if (row is Instructor instructor)
-                    {
-                        await Database.DeleteInstructor(instructor.InstructorId);
-                    }
-                    break;
-                }
-            }
         }
     }
 
@@ -229,6 +211,15 @@ public partial class MainWindow : Window
         createSubscriptionWindow.ShowDialog();
     }
 
+    private void MenuItemSubscriptionType_Click(object sender, RoutedEventArgs e)
+    {
+        CreateSubscriptionTypeWindow createSubscriptionTypeWindow = new()
+        {
+            Owner = this
+        };
+        createSubscriptionTypeWindow.ShowDialog();
+    }
+
     private void TogglePoolFilterButton_Click(object sender, RoutedEventArgs e)
     {
         if ((bool)FilterPoolButton.IsChecked!)
@@ -258,7 +249,7 @@ public partial class MainWindow : Window
         createPoolWindow.ShowDialog();
     }
 
-    private void MenuItemSubscriptionExportPDF_Click(object sender, RoutedEventArgs e)
+    private void MenuItemSubscriptionExportPDFType_Click(object sender, RoutedEventArgs e)
     {
         Document pdfDocument = Document.Create(container =>
         {
@@ -269,13 +260,10 @@ public partial class MainWindow : Window
                 {
                     // Додавання інформації про абонементи
                     page.Margin(25);
-                    foreach (Subscription subscription in mainWindowViewModel.Subscriptions)
+                    foreach (SubscriptionType subscriptionType in mainWindowViewModel.SubscriptionTypes)
                     {
-                        col.Item().Text($"Тип: {subscription.SubscriptionType}").FontSize(14);
-                        col.Item().Text($"Ціна: {subscription.PriceAsString}").FontSize(14);
-                        col.Item().Text($"Початок: {subscription.StartDate:dd.MM.yyyy}").FontSize(14);
-                        col.Item().Text($"Кінець: {subscription.EndDate:dd.MM.yyyy}").FontSize(14);
-                        col.Item().Text($"Клієнт: {subscription.ClientName}").FontSize(14);
+                        col.Item().Text($"Назва: {subscriptionType.Name}").FontSize(14);
+                        col.Item().Text($"Опис: {subscriptionType.Description}").FontSize(14);
                         col.Item().Text("");
                     }
                 });
@@ -294,8 +282,52 @@ public partial class MainWindow : Window
         }
 
         pdfDocument.GeneratePdf(openFileDialog.FolderName + $"\\Абонементи - {DateTime.Now:yyyy-MM-dd_HH-mm-ss}.pdf");
-       
+
         MessageBoxResult result = MessageBox.Show("Файл було успішно створено!\nЧи хочете ви відчинити папку де знаходится файл?", "PDF Експорт - Абонементи", MessageBoxButton.YesNo, MessageBoxImage.Information);
+        if (result == MessageBoxResult.Yes)
+        {
+            Process.Start("explorer.exe", openFileDialog.FolderName);
+        }
+    }
+
+    private void MenuItemSubscriptionExportPDF_Click(object sender, RoutedEventArgs e)
+    {
+        Document pdfDocument = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Header().Text("Список абонентів, які купили підписку").FontSize(24).Bold().AlignCenter();
+                page.Content().Column(col =>
+                {
+                    // Додавання інформації про абонементи
+                    page.Margin(25);
+                    foreach (Subscription subscription in mainWindowViewModel.Subscriptions)
+                    {
+                        col.Item().Text($"Тип: {subscription.SubscriptionTypeName}").FontSize(14);
+                        col.Item().Text($"Ціна: {subscription.PriceAsString}").FontSize(14);
+                        col.Item().Text($"Початок: {subscription.StartDate:dd.MM.yyyy}").FontSize(14);
+                        col.Item().Text($"Кінець: {subscription.EndDate:dd.MM.yyyy}").FontSize(14);
+                        col.Item().Text($"Клієнт: {subscription.ClientName}").FontSize(14);
+                        col.Item().Text("");
+                    }
+                });
+                page.Footer().Text($"Дата створення документу: {DateTime.Now:yyyy.MM.dd HH:mm:ss}").AlignCenter();
+            });
+        });
+        OpenFolderDialog openFileDialog = new()
+        {
+            Title = "Оберіть шлях експорту PDF за результатами абонентів що купили підписку"
+        };
+        openFileDialog.ShowDialog();
+
+        if (string.IsNullOrEmpty(openFileDialog.FolderName))
+        {
+            return;
+        }
+
+        pdfDocument.GeneratePdf(openFileDialog.FolderName + $"\\Список абонентів що купили підписку - {DateTime.Now:yyyy-MM-dd_HH-mm-ss}.pdf");
+       
+        MessageBoxResult result = MessageBox.Show("Файл було успішно створено!\nЧи хочете ви відчинити папку де знаходится файл?", "PDF Експорт - Список абонентів що купили підписку", MessageBoxButton.YesNo, MessageBoxImage.Information);
         if (result == MessageBoxResult.Yes)
         {
             Process.Start("explorer.exe", openFileDialog.FolderName);

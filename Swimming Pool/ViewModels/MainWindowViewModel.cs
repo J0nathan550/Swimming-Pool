@@ -21,6 +21,8 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<Subscription> subscriptions = [];
     [ObservableProperty]
+    private ObservableCollection<SubscriptionType> subscriptionTypes = [];
+    [ObservableProperty]
     private Training? selectedTraining;
     [ObservableProperty]
     private int selectedClientId;

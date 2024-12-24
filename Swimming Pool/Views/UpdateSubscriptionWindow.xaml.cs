@@ -24,17 +24,19 @@ public partial class UpdateSubscriptionWindow : Window
         StartDatePicker.Value = DateTime.Now;
         EndDatePicker.Value = DateTime.Now.AddDays(30);
         CreateSubscriptionViewModel.Clients = await Database.GetAllClients();
+        CreateSubscriptionViewModel.SubscriptionTypes = await Database.GetAllSubscriptionTypes();
         _subscriptionID = subscriptionID;
         _subscription = await Database.GetSubscriptionById(subscriptionID);
 
         // Populate fields with existing subscription data
-        SubscriptionTypeTextBox.Text = _subscription!.SubscriptionType;
         PriceTextBox.Text = _subscription.Price.ToString("F2");
         StartDatePicker.Value = _subscription.StartDate;
         EndDatePicker.Value = _subscription.EndDate;
 
         Client? client = await Database.GetClientById(_subscription.ClientId);
         SelectItemById(ClientComboBox, client, c => c!.ClientId);
+        SubscriptionType? subscriptionType = await Database.GetSubscriptionTypeById(_subscription.SubscriptionTypeId);
+        SelectItemById(SubscriptionTypeComboBox, subscriptionType, s => s!.SubscriptionTypeId);
     }
 
     public static void SelectItemById<T>(ComboBox comboBox, T targetItem, Func<T, int> idSelector)
@@ -64,10 +66,11 @@ public partial class UpdateSubscriptionWindow : Window
         DateTime startDate = StartDatePicker.Value ?? DateTime.Now;
         DateTime endDate = EndDatePicker.Value ?? DateTime.Now.AddDays(30);
         Client selectedClient = (Client)ClientComboBox.SelectedItem;
+        SubscriptionType selectedSubscriptionType = (SubscriptionType)SubscriptionTypeComboBox.SelectedItem;
 
         await Database.UpdateSubscription(
             _subscriptionID,
-            SubscriptionTypeTextBox.Text,
+            selectedSubscriptionType.SubscriptionTypeId,
             float.Parse(PriceTextBox.Text),
             startDate,
             endDate,
@@ -83,7 +86,7 @@ public partial class UpdateSubscriptionWindow : Window
     {
         bool isOkay = true;
 
-        if (string.IsNullOrWhiteSpace(SubscriptionTypeTextBox.Text))
+        if (SubscriptionTypeComboBox.SelectedItem == null)
         {
             isOkay = false;
         }
@@ -117,10 +120,10 @@ public partial class UpdateSubscriptionWindow : Window
         if (_subscription == null) return;
 
         MessageBoxResult result = MessageBox.Show(
-            $"Are you sure you want to delete subscription {_subscription.SubscriptionType} for client {_subscription.ClientId}?",
+            $"Are you sure you want to delete subscription {_subscription.SubscriptionTypeName} for client {_subscription.ClientId}?",
             "Deleting Subscription",
             MessageBoxButton.YesNo,
-            MessageBoxImage.Warning);
+            MessageBoxImage.Information);
 
         if (result == MessageBoxResult.Yes)
         {

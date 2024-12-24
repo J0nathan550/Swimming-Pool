@@ -6,7 +6,8 @@ namespace Swimming_Pool.Models;
 public partial class Subscription
 {
     public int SubscriptionId { get; set; }
-    public string? SubscriptionType { get; set; }
+    public int SubscriptionTypeId { get; set; }
+    public string? SubscriptionTypeName { get; set; }
     public float Price { get; set; }
     public string PriceAsString { get => Price.ToString("F2") + "₴"; }
     public DateTime StartDate { get; set; }
@@ -26,4 +27,5 @@ public partial class Subscription
     }
 
     public async Task SetClientNameAsync() => ClientName = await Database.GetClientNameByIdAsync(ClientId);
+    public async Task SetSubscriptionTypeNameAsync() => SubscriptionTypeName = await Database.GetSubscriptionTypeNameByIdAsync(SubscriptionTypeId);
 }

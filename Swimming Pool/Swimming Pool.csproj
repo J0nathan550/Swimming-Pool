@@ -31,6 +31,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\CreateSubscriptionTypeWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\CreateSubscriptionWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -41,6 +44,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\CreateInstructorWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\UpdateSubscriptionTypeWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\UpdateSubscriptionWindow.xaml.cs">

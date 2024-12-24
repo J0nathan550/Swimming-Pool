@@ -8,7 +8,7 @@
     xmlns:viewmodels="clr-namespace:Swimming_Pool.ViewModels"
     Title="Swimming Pool - Update Subscription"
     Width="346"
-    Height="440"
+    Height="410"
     d:DataContext="{d:DesignInstance Type=viewmodels:CreateUpdateSubscriptionViewModel}"
     ResizeMode="NoResize"
     WindowStartupLocation="CenterOwner"
@@ -35,23 +35,23 @@
                 </Grid.RowDefinitions>
                 <TextBlock
                     Grid.Row="0"
-                    Margin="10"
+                    Margin="10,12,10,10"
                     Text="Subscription Type:" />
                 <TextBlock
                     Grid.Row="1"
-                    Margin="10,5,0,0"
+                    Margin="10,14,10,10"
                     Text="Price:" />
                 <TextBlock
                     Grid.Row="2"
-                    Margin="10,5,0,0"
+                    Margin="10,12,10,10"
                     Text="Start Date:" />
                 <TextBlock
                     Grid.Row="3"
-                    Margin="10,5,0,0"
+                    Margin="10,12,10,10"
                     Text="End Date:" />
                 <TextBlock
                     Grid.Row="4"
-                    Margin="10,5,0,0"
+                    Margin="10"
                     Text="Client:" />
             </Grid>
             <Grid Grid.Column="1">
@@ -62,11 +62,21 @@
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
-                <TextBox
-                    Name="SubscriptionTypeTextBox"
+                <ComboBox
+                    Name="SubscriptionTypeComboBox"
                     Grid.Row="0"
                     Margin="10"
-                    TextChanged="TextBox_TextChanged" />
+                    ItemsSource="{Binding SubscriptionTypes}"
+                    SelectedIndex="0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <Run Text="{Binding SubscriptionTypeId}" />
+                                <Run Text="{Binding Name}" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <TextBox
                     Name="PriceTextBox"
                     Grid.Row="1"

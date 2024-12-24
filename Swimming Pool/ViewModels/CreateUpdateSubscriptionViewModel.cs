@@ -8,4 +8,6 @@ public partial class CreateUpdateSubscriptionViewModel : ObservableObject
 {
     [ObservableProperty]
     private ObservableCollection<Client> _clients = [];
+    [ObservableProperty]
+    private ObservableCollection<SubscriptionType> _subscriptionTypes = [];
 }

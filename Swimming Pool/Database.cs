@@ -48,6 +48,7 @@ public static class Database
         foreach (Subscription subscription in subscriptions)
         {
             await subscription.SetClientNameAsync();
+            await subscription.SetSubscriptionTypeNameAsync();
         }
 
         return new ObservableCollection<Subscription>(subscriptions);
@@ -68,18 +69,27 @@ public static class Database
         foreach (Subscription subscription in subscriptions)
         {
             await subscription.SetClientNameAsync();
+            await subscription.SetSubscriptionTypeNameAsync();
         }
         return new ObservableCollection<Subscription>(subscriptions);
     }
 
-    public static async Task CreateSubscription(string subscriptionType, float price, DateTime startDate, DateTime endDate, int clientId)
+    public static async Task<ObservableCollection<SubscriptionType>> GetAllSubscriptionTypes()
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
-        string sql = @"INSERT INTO subscription (subscription_type, price, start_date, end_date, client_id)
-                   VALUES (@SubscriptionType, @Price, @StartDate, @EndDate, @ClientId)";
+        string sql = "SELECT * FROM subscription_type";
+        IEnumerable<SubscriptionType> subscriptions = await connection.QueryAsync<SubscriptionType>(sql);
+        return new ObservableCollection<SubscriptionType>(subscriptions);
+    }
+
+    public static async Task CreateSubscription(int subscriptionTypeId, float price, DateTime startDate, DateTime endDate, int clientId)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = @"INSERT INTO subscription (subscription_type_id, price, start_date, end_date, client_id)
+                   VALUES (@SubscriptionTypeId, @Price, @StartDate, @EndDate, @ClientId)";
         await connection.ExecuteAsync(sql, new
         {
-            SubscriptionType = subscriptionType,
+            SubscriptionTypeId = subscriptionTypeId,
             Price = price,
             StartDate = startDate,
             EndDate = endDate,
@@ -87,11 +97,23 @@ public static class Database
         });
     }
 
-    public static async Task UpdateSubscription(int subscriptionId, string subscriptionType, float price, DateTime startDate, DateTime endDate, int clientId)
+    public static async Task CreateSubscriptionType(string name, string description)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = @"INSERT INTO subscription_type (name, description)
+                   VALUES (@Name, @Description)";
+        await connection.ExecuteAsync(sql, new
+        {
+            Name = name,
+            Description = description
+        });
+    }
+
+    public static async Task UpdateSubscription(int subscriptionId, int subscriptionTypeId, float price, DateTime startDate, DateTime endDate, int clientId)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
         string sql = @"UPDATE subscription 
-                   SET subscription_type = @SubscriptionType, 
+                   SET subscription_type_id = @SubscriptionTypeId, 
                        price = @Price, 
                        start_date = @StartDate, 
                        end_date = @EndDate, 
@@ -100,12 +122,31 @@ public static class Database
         await connection.ExecuteAsync(sql, new
         {
             SubscriptionId = subscriptionId,
-            SubscriptionType = subscriptionType,
+            SubscriptionTypeId = subscriptionTypeId,
             Price = price,
             StartDate = startDate,
             EndDate = endDate,
             ClientId = clientId
         });
+    }
+
+    public static async Task UpdateSubscriptionType(int subscriptionTypeId, string name, string description)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = @"UPDATE subscription_type SET name = @Name, description = @Description WHERE subscription_type_id = @SubscriptionTypeId";
+        await connection.ExecuteAsync(sql, new
+        {
+            SubscriptionTypeId = subscriptionTypeId,
+            Name = name,
+            Description = description
+        });
+    }
+
+    public static async Task DeleteSubscriptionType(int subscriptionTypeId)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "DELETE FROM subscription_type WHERE subscription_type_id = @SubscriptionTypeId";
+        await connection.ExecuteAsync(sql, new { SubscriptionTypeId = subscriptionTypeId });
     }
 
     public static async Task<Subscription?> GetSubscriptionById(int subscriptionID)
@@ -159,6 +200,14 @@ public static class Database
         string sql = "SELECT * FROM client WHERE client_id = @ClientId;";
         Client? client = await connection.QueryFirstOrDefaultAsync<Client>(sql, new { ClientId = clientId });
         return client;
+    }
+
+    public static async Task<SubscriptionType?> GetSubscriptionTypeById(int subscriptionTypeId)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT * FROM subscription_type WHERE subscription_type_id = @SubscriptionTypeId;";
+        SubscriptionType? subscriptionType = await connection.QueryFirstOrDefaultAsync<SubscriptionType>(sql, new { SubscriptionTypeId = subscriptionTypeId });
+        return subscriptionType;
     }
 
     public static async Task<ObservableCollection<Client>> GetClientsFiltered(string firstName, string lastName, string age, string phoneNumber, string email)
@@ -228,13 +277,20 @@ public static class Database
         ObservableCollection<Client> result = [.. clients];
         return result;
     }
-
     public static async Task<string> GetClientNameByIdAsync(int clientId)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
         string sql = "SELECT CONCAT(first_name, ' ', last_name) FROM client WHERE client_id = @ClientId;";
         string? clientName = await connection.ExecuteScalarAsync<string>(sql, new { ClientId = clientId });
         return clientName ?? string.Empty;
+    }
+
+    public static async Task<string> GetSubscriptionTypeNameByIdAsync(int subscriptionTypeId)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT name FROM subscription_type WHERE subscription_type_id = @SubscriptionTypeId;";
+        string? name = await connection.ExecuteScalarAsync<string>(sql, new { SubscriptionTypeId = subscriptionTypeId });
+        return name ?? string.Empty;
     }
 
     #endregion

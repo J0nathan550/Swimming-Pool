@@ -1,0 +1,72 @@
+﻿<Window
+    x:Class="Swimming_Pool.Views.UpdateSubscriptionTypeWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:extended="http://schemas.xceed.com/wpf/xaml/toolkit"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="clr-namespace:Swimming_Pool.ViewModels"
+    Title="Swimming Pool - Update Subscription Type"
+    Width="346"
+    Height="290"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+    <StackPanel>
+        <TextBlock
+            Margin="10"
+            HorizontalAlignment="Center"
+            FontSize="24"
+            FontWeight="Bold"
+            Text="Updating Subscription Type" />
+        <Grid Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock
+                    Grid.Row="0"
+                    Margin="10"
+                    Text="Subscription Type:" />
+                <TextBlock
+                    Grid.Row="1"
+                    Margin="10"
+                    Text="Description:" />
+            </Grid>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBox
+                    Name="NameTextBox"
+                    Grid.Row="0"
+                    Margin="10"
+                    TextChanged="TextBox_TextChanged" />
+                <TextBox
+                    Name="DescriptionTextBox"
+                    Grid.Row="1"
+                    Margin="10"
+                    TextChanged="TextBox_TextChanged" />
+            </Grid>
+        </Grid>
+        <Button
+            Name="UpdateSubscriptionTypeButton"
+            Margin="10,5,10,10"
+            Click="UpdateSubscriptionTypeButton_Click"
+            IsEnabled="False">
+            <TextBlock Text="Update Subscription Type" />
+        </Button>
+        <Button Margin="10,2,10,10" Click="DeleteSubscriptionTypeButton_Click">
+            <TextBlock Text="Delete Subscription Type" />
+        </Button>
+        <Button Margin="10,2,10,10" Click="CancelUpdatingButton_Click">
+            <TextBlock Text="Cancel Updating" />
+        </Button>
+    </StackPanel>
+</Window>

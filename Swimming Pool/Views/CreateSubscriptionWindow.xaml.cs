@@ -22,6 +22,7 @@ public partial class CreateSubscriptionWindow : Window
         StartDatePicker.Value = DateTime.Now;
         EndDatePicker.Value = DateTime.Now.AddDays(30); // Default to 1 month
         CreateSubscriptionViewModel.Clients = await Database.GetAllClients();
+        CreateSubscriptionViewModel.SubscriptionTypes = await Database.GetAllSubscriptionTypes();
     }
 
     private async void CancelCreationButton_Click(object sender, RoutedEventArgs e)
@@ -44,9 +45,10 @@ public partial class CreateSubscriptionWindow : Window
         DateTime endDate = EndDatePicker.Value ?? DateTime.Now.AddDays(30);
 
         Client selectedClient = (Client)ClientComboBox.SelectedItem;
+        SubscriptionType selectedSubscriptionType = (SubscriptionType)SubscriptionTypeComboBox.SelectedItem;
 
         await Database.CreateSubscription(
-            SubscriptionTypeTextBox.Text,
+            selectedSubscriptionType.SubscriptionTypeId,
             float.Parse(PriceTextBox.Text),
             startDate,
             endDate,
@@ -62,7 +64,7 @@ public partial class CreateSubscriptionWindow : Window
     {
         bool isOkay = true;
 
-        if (string.IsNullOrWhiteSpace(SubscriptionTypeTextBox.Text))
+        if (SubscriptionTypeComboBox.SelectedItem == null)
         {
             isOkay = false;
         }
