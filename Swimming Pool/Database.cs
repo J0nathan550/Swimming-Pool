@@ -513,16 +513,20 @@ public static class Database
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
         string sql = "SELECT * FROM instructor;";
         IEnumerable<Instructor> instructors = await connection.QueryAsync<Instructor>(sql);
+        foreach (Instructor instructor in instructors)
+        {
+            await instructor.SetSpecializationTypeNameAsync();
+        }
         ObservableCollection<Instructor> result = [.. instructors];
         return result;
     }
 
-    public static async Task CreateInstructor(string firstName, string lastName, int age, string phoneNumber, string emailAddress, string specialization)
+    public static async Task CreateInstructor(string firstName, string lastName, int age, string phoneNumber, string emailAddress, int specialization_id)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
-        string sql = @"INSERT INTO instructor (first_name, last_name, age, phone_number, email_address, specialization)
-                        VALUES (@FirstName, @LastName, @Age, @PhoneNumber, @EmailAddress, @Specialization);";
-        await connection.ExecuteAsync(sql, new { FirstName = firstName, LastName = lastName, Age = age, PhoneNumber = phoneNumber, EmailAddress = emailAddress, Specialization = specialization });
+        string sql = @"INSERT INTO instructor (first_name, last_name, age, phone_number, email_address, instructor_specialization_id)
+                        VALUES (@FirstName, @LastName, @Age, @PhoneNumber, @EmailAddress, @SpecializationId);";
+        await connection.ExecuteAsync(sql, new { FirstName = firstName, LastName = lastName, Age = age, PhoneNumber = phoneNumber, EmailAddress = emailAddress, SpecializationId = specialization_id });
     }
 
     public static async Task DeleteInstructor(int instructorId)
@@ -532,14 +536,14 @@ public static class Database
         await connection.ExecuteAsync(sql, new { InstructorId = instructorId });
     }
 
-    public static async Task UpdateInstructor(int instructorId, string firstName, string lastName, int age, string phoneNumber, string emailAddress, string specialization)
+    public static async Task UpdateInstructor(int instructorId, string firstName, string lastName, int age, string phoneNumber, string emailAddress, int specialization_id)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
         string sql = @"UPDATE instructor 
                            SET first_name = @FirstName, last_name = @LastName, age = @Age, 
-                               phone_number = @PhoneNumber, email_address = @EmailAddress, specialization = @Specialization
+                               phone_number = @PhoneNumber, email_address = @EmailAddress, instructor_specializtion_id = @SpecializationId
                            WHERE instructor_id = @InstructorId;";
-        await connection.ExecuteAsync(sql, new { InstructorId = instructorId, FirstName = firstName, LastName = lastName, Age = age, PhoneNumber = phoneNumber, EmailAddress = emailAddress, Specialization = specialization });
+        await connection.ExecuteAsync(sql, new { InstructorId = instructorId, FirstName = firstName, LastName = lastName, Age = age, PhoneNumber = phoneNumber, EmailAddress = emailAddress, SpecializationId = specialization_id });
     }
 
     public static async Task<Instructor?> GetInstructorById(int instructorId)
@@ -627,6 +631,10 @@ public static class Database
             first = false;
         }
         IEnumerable<Instructor> instructors = await connection.QueryAsync<Instructor>(sql, new { FirstName = firstName, LastName = lastName, Age = age, PhoneNumber = phoneNumber, EmailAddress = email });
+        foreach (Instructor instructor in instructors)
+        {
+            await instructor.SetSpecializationTypeNameAsync();
+        }
         ObservableCollection<Instructor> result = [.. instructors];
         return result;
     }
@@ -805,9 +813,51 @@ public static class Database
 
     #endregion
 
-    public static async Task<IEnumerable<dynamic>> ExecuteQuery(string query)
+    #region SpecializationType
+
+    public static async Task CreateSpecializationType(string specialization)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
-        return await connection.QueryAsync(query);
+        string sql = @"INSERT INTO instructor_specialization (text) VALUES (@Text)";
+        await connection.ExecuteAsync(sql, new { Specialization = specialization });
     }
+
+    public static async Task<ObservableCollection<SpecializationType>> GetAllSpecializationTypes()
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = @"SELECT * FROM instructor_specialization";
+        IEnumerable<SpecializationType> result = await connection.QueryAsync<SpecializationType>(sql);
+        return new ObservableCollection<SpecializationType>(result);
+    }
+
+    public static async Task<SpecializationType?> GetSpecializationTypeById(int specializationTypeId)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = @"SELECT * FROM instructor_specialization WHERE instructor_specialization_id = @SpecializationTypeId";
+        return await connection.QueryFirstOrDefaultAsync<SpecializationType>(sql, new { SpecializationTypeId = specializationTypeId });
+    }
+
+    public static async Task UpdateSpecializationType(int specializationTypeId, string specialization)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = @"UPDATE instructor_specialization SET specialization = @Specialization WHERE instructor_specialization_id = @SpecializationTypeId";
+        await connection.ExecuteAsync(sql, new { SpecializationTypeId = specializationTypeId, Specialization = specialization });
+    }
+
+    public static async Task DeleteSpecializationType(int specializationTypeId)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = @"DELETE FROM instructor_specialization WHERE instructor_specialization_id = @SpecializationTypeId";
+        await connection.ExecuteAsync(sql, new { SpecializationTypeId = specializationTypeId });
+    }
+
+    public static async Task<string> GetSpecializationTypeNameByIdAsync(int specializationId)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT specialization FROM instructor_specialization WHERE instructor_specialization_id = @SpecializationId";
+        string? specialization = await connection.ExecuteScalarAsync<string>(sql, new { SpecializationId = specializationId });
+        return specialization ?? string.Empty;
+    }
+
+    #endregion
 }

@@ -1,4 +1,5 @@
 ﻿using Swimming_Pool.Models;
+using Swimming_Pool.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -6,10 +7,15 @@ namespace Swimming_Pool.Views;
 
 public partial class UpdateInstructorWindow : Window
 {
+    private readonly CreateUpdateSpecializationViewModel _createUpdateSpecializationViewModel = new();
     private Instructor? _instructor;
     private int _instructorID = -1;
 
-    public UpdateInstructorWindow() => InitializeComponent();
+    public UpdateInstructorWindow()
+    {
+        DataContext = _createUpdateSpecializationViewModel;
+        InitializeComponent();
+    }
 
     public async void Initialize(int clientID)
     {
@@ -20,7 +26,17 @@ public partial class UpdateInstructorWindow : Window
         AgeTextBox.Value = _instructor.Age;
         EmailAddressTextBox.Text = _instructor.EmailAddress;
         PhoneNumberTextBox.Text = _instructor.PhoneNumber;
-        SpecializationTextBox.Text = _instructor.Specialization;
+        _createUpdateSpecializationViewModel.SpecializationTypes = await Database.GetAllSpecializationTypes();
+        SpecializationType? specializationType = await Database.GetSpecializationTypeById(_instructor.InstructorSpecializationId);
+        SelectItemById(SpecializationTypeComboBox, specializationType, s => s!.InstructorSpecializationId);
+    }
+
+    public static void SelectItemById<T>(ComboBox comboBox, T targetItem, Func<T, int> idSelector)
+    {
+        if (comboBox.ItemsSource == null || targetItem == null) return;
+        int targetId = idSelector(targetItem);
+        int index = comboBox.ItemsSource.Cast<T>().ToList().FindIndex(item => idSelector(item) == targetId);
+        comboBox.SelectedIndex = index >= 0 ? index : -1;
     }
 
     private async void CancelUpdatingButton_Click(object sender, RoutedEventArgs e)
@@ -38,7 +54,8 @@ public partial class UpdateInstructorWindow : Window
             UpdateInstructorButton.IsEnabled = false;
             return;
         }
-        await Database.UpdateInstructor(_instructorID, FirstNameTextBox.Text, LastNameTextBox.Text, int.Parse(AgeTextBox.Text), PhoneNumberTextBox.Text, EmailAddressTextBox.Text, SpecializationTextBox.Text);
+        SpecializationType? specializationType = (SpecializationType)SpecializationTypeComboBox.SelectedItem;
+        await Database.UpdateInstructor(_instructorID, FirstNameTextBox.Text, LastNameTextBox.Text, int.Parse(AgeTextBox.Text), PhoneNumberTextBox.Text, EmailAddressTextBox.Text, specializationType.InstructorSpecializationId);
         MainWindow.MainWindowViewModel.Instructors = await Database.GetAllInstructors();
         Close();
     }

@@ -1,6 +1,4 @@
-﻿using Swimming_Pool.Models;
-using Swimming_Pool.ViewModels;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
 namespace Swimming_Pool.Views;

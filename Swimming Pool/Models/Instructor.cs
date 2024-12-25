@@ -11,7 +11,8 @@ public partial class Instructor
     public string? LastName { get; set; }
     public string? PhoneNumber { get; set; }
     public string? EmailAddress { get; set; }
-    public string? Specialization { get; set; }
+    public int InstructorSpecializationId { get; set; }
+    public string? SpecializationName { get; set; }
 
     [RelayCommand]
     private static void UpdateInstructor(int instructorId)
@@ -23,4 +24,6 @@ public partial class Instructor
         updateInstructorWindow.Initialize(instructorId);
         updateInstructorWindow.ShowDialog();
     }
+
+    public async Task SetSpecializationTypeNameAsync() => SpecializationName = await Database.GetSpecializationTypeNameByIdAsync(InstructorSpecializationId);
 }

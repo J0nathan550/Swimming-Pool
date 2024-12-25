@@ -105,6 +105,15 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Subscribe">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding UpdateClientCommand}" CommandParameter="{Binding ClientId}">
+                                            <TextBlock Text="Subscribe" />
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -235,6 +244,36 @@
                     </DataGrid>
                 </Grid>
             </TabItem>
+            <TabItem Header="Instructors Specialization">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Menu>
+                        <MenuItem Click="MenuItemInstructorSpecialization_Click" Header="Add Instructor Specialization" />
+                        <MenuItem Click="MenuItemInstructorSpecializationExportPDF_Click" Header="Export PDF..." />
+                    </Menu>
+                    <DataGrid
+                        Grid.Row="2"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        ItemsSource="{Binding SpecializationTypes}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Specialization}" Header="Specialization" />
+                            <DataGridTemplateColumn Header="Edit">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding UpdateSpecializationTypeCommand}" CommandParameter="{Binding InstructorSpecializationId}">
+                                            <TextBlock Text="Edit Instructor Specialization" />
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
             <TabItem Header="Instructors">
                 <Grid Background="#FFE5E5E5">
                     <Grid.RowDefinitions>
@@ -309,7 +348,7 @@
                             <DataGridTextColumn Binding="{Binding Age}" Header="Age" />
                             <DataGridTextColumn Binding="{Binding PhoneNumber}" Header="Phone Number" />
                             <DataGridTextColumn Binding="{Binding EmailAddress}" Header="Email Address" />
-                            <DataGridTextColumn Binding="{Binding Specialization}" Header="Specialization" />
+                            <DataGridTextColumn Binding="{Binding SpecializationName}" Header="Specialization" />
                             <DataGridTemplateColumn Header="Edit">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>

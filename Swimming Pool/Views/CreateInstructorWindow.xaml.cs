@@ -1,11 +1,25 @@
-﻿using System.Windows;
+﻿using Swimming_Pool.Models;
+using Swimming_Pool.ViewModels;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace Swimming_Pool.Views;
 
 public partial class CreateInstructorWindow : Window
 {
-    public CreateInstructorWindow() => InitializeComponent();
+    private readonly CreateUpdateSpecializationViewModel _createUpdateSpecializationViewModel = new();
+
+    public CreateInstructorWindow()
+    {
+        DataContext = _createUpdateSpecializationViewModel;
+        InitializeComponent();
+        Initialize();
+    }
+
+    private async void Initialize()
+    {
+        _createUpdateSpecializationViewModel.SpecializationTypes = await Database.GetAllSpecializationTypes();
+    }
 
     private async void CancelCreationButton_Click(object sender, RoutedEventArgs e)
     {
@@ -22,7 +36,10 @@ public partial class CreateInstructorWindow : Window
             CreateInstructorButton.IsEnabled = false;
             return;
         }
-        await Database.CreateInstructor(FirstNameTextBox.Text, LastNameTextBox.Text, int.Parse(AgeTextBox.Text), PhoneNumberTextBox.Text, EmailAddressTextBox.Text, SpecializationTextBox.Text);
+
+        SpecializationType? specializationType = (SpecializationType)SpecializationTypeComboBox.SelectedItem;
+
+        await Database.CreateInstructor(FirstNameTextBox.Text, LastNameTextBox.Text, int.Parse(AgeTextBox.Text), PhoneNumberTextBox.Text, EmailAddressTextBox.Text, specializationType.InstructorSpecializationId);
         MainWindow.MainWindowViewModel.Instructors = await Database.GetAllInstructors();
         Close();
     }
@@ -49,11 +66,6 @@ public partial class CreateInstructorWindow : Window
         }
 
         if (string.IsNullOrWhiteSpace(PhoneNumberTextBox.Text))
-        {
-            isOkay = false;
-        }
-
-        if (string.IsNullOrWhiteSpace(SpecializationTextBox.Text))
         {
             isOkay = false;
         }

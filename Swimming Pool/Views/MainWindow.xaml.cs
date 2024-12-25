@@ -5,7 +5,6 @@ using Swimming_Pool.ViewModels;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace Swimming_Pool.Views;
 
@@ -39,6 +38,7 @@ public partial class MainWindow : Window
 
             MainWindowViewModel.Subscriptions = await Database.GetAllSubscriptions();
             MainWindowViewModel.SubscriptionTypes = await Database.GetAllSubscriptionTypes();
+            MainWindowViewModel.SpecializationTypes = await Database.GetAllSpecializationTypes();
 
             MainWindowViewModel.Pools = await Database.GetAllPools();
             MainWindowViewModel.PoolsWithNull = [..MainWindowViewModel.Pools];
@@ -104,6 +104,15 @@ public partial class MainWindow : Window
             );
             MainWindowViewModel.Trainings = await Database.GetAllTrainings();
         }
+    }
+
+    private void MenuItemInstructorSpecialization_Click(object sender, RoutedEventArgs e)
+    {
+        CreateSpecializationTypeWindow createSpecializationTypeWindow = new()
+        {
+            Owner = this
+        };
+        createSpecializationTypeWindow.ShowDialog();
     }
 
     private void MenuItemInstructor_Click(object sender, RoutedEventArgs e)
@@ -384,6 +393,52 @@ public partial class MainWindow : Window
         }
     }
 
+    private void MenuItemInstructorSpecializationExportPDF_Click(object sender, RoutedEventArgs e)
+    {
+        Document pdfDocument = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Header().Text("Список специалізацій інструкторів").FontSize(24).Bold().AlignCenter();
+                page.Content().Column(col =>
+                {
+                    page.Margin(25);
+                    foreach (SpecializationType specialization in mainWindowViewModel.SpecializationTypes)
+                    {
+                        col.Item().Text($"Спеціалізація: {specialization.Specialization}").FontSize(14);
+                        col.Item().Text("");
+                    }
+                });
+                page.Footer().Text($"Дата створення документу: {DateTime.Now:yyyy.MM.dd HH:mm:ss}").AlignCenter();
+            });
+        });
+
+        OpenFolderDialog openFileDialog = new()
+        {
+            Title = "Оберіть шлях експорту PDF за результатами специалізацій інструкторів"
+        };
+        openFileDialog.ShowDialog();
+
+        if (string.IsNullOrEmpty(openFileDialog.FolderName))
+        {
+            return;
+        }
+
+        pdfDocument.GeneratePdf(openFileDialog.FolderName + $"\\Інструктори - {DateTime.Now:yyyy-MM-dd_HH-mm-ss}.pdf");
+
+        MessageBoxResult result = MessageBox.Show(
+            "Файл було успішно створено!\nЧи хочете ви відчинити папку де знаходиться файл?",
+            "PDF Експорт - Cпециалізацій інструкторів",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Information
+        );
+
+        if (result == MessageBoxResult.Yes)
+        {
+            Process.Start("explorer.exe", openFileDialog.FolderName);
+        }
+    }
+
     private void MenuItemInstructorExportPDF_Click(object sender, RoutedEventArgs e)
     {
         Document pdfDocument = Document.Create(container =>
@@ -401,7 +456,7 @@ public partial class MainWindow : Window
                         col.Item().Text($"Вік: {instructor.Age}").FontSize(14);
                         col.Item().Text($"Телефон: {instructor.PhoneNumber}").FontSize(14);
                         col.Item().Text($"Електронна пошта: {instructor.EmailAddress}").FontSize(14);
-                        col.Item().Text($"Спеціалізація: {instructor.Specialization}").FontSize(14);
+                        col.Item().Text($"Спеціалізація: {instructor.SpecializationName}").FontSize(14);
                         col.Item().Text("");
                     }
                 });

@@ -5,9 +5,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:extended="http://schemas.xceed.com/wpf/xaml/toolkit"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="clr-namespace:Swimming_Pool.ViewModels"
     Title="Swimming Pool - Creating Instructor"
     Width="337"
     Height="393"
+    d:DataContext="{d:DesignInstance Type=viewmodels:CreateUpdateSpecializationViewModel}"
     ResizeMode="NoResize"
     WindowStartupLocation="CenterOwner"
     mc:Ignorable="d">
@@ -91,11 +93,21 @@
                     Grid.Row="4"
                     Margin="10,5,10,10"
                     TextChanged="TextBox_TextChanged" />
-                <TextBox
-                    Name="SpecializationTextBox"
+                <ComboBox
+                    Name="SpecializationTypeComboBox"
                     Grid.Row="5"
                     Margin="10,5,10,10"
-                    TextChanged="TextBox_TextChanged" />
+                    ItemsSource="{Binding SpecializationTypes}"
+                    SelectedIndex="0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <Run Text="{Binding InstructorSpecializationId}" />
+                                <Run Text="{Binding Specialization}" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </Grid>
         </Grid>
         <Button
