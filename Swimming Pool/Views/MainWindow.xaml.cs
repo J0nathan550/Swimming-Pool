@@ -424,7 +424,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        pdfDocument.GeneratePdf(openFileDialog.FolderName + $"\\Інструктори - {DateTime.Now:yyyy-MM-dd_HH-mm-ss}.pdf");
+        pdfDocument.GeneratePdf(openFileDialog.FolderName + $"\\Спеціалізація Інструкторів - {DateTime.Now:yyyy-MM-dd_HH-mm-ss}.pdf");
 
         MessageBoxResult result = MessageBox.Show(
             "Файл було успішно створено!\nЧи хочете ви відчинити папку де знаходиться файл?",

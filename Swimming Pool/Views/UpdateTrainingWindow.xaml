@@ -8,7 +8,7 @@
     xmlns:viewmodels="clr-namespace:Swimming_Pool.ViewModels"
     Title="Swimming Pool - Update Training"
     Width="646"
-    Height="400"
+    Height="360"
     d:DataContext="{d:DesignInstance Type=viewmodels:CreateUpdateTrainingViewModel}"
     ResizeMode="NoResize"
     WindowStartupLocation="CenterOwner"
