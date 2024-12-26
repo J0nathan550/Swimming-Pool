@@ -174,7 +174,6 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                             <ColumnDefinition />
-                            <ColumnDefinition />
                             <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
                         <extended:WatermarkTextBox
@@ -183,22 +182,22 @@
                             Watermark="Subscription Type Filter..." />
                         <extended:WatermarkTextBox
                             Name="FilterSubscriptionPrice"
-                            Grid.Column="2"
+                            Grid.Column="1"
                             Watermark="Price Filter..." />
                         <extended:WatermarkTextBox
                             Name="FilterSubscriptionStartDate"
-                            Grid.Column="3"
+                            Grid.Column="2"
                             Watermark="Start Date Filter..." />
                         <extended:WatermarkTextBox
                             Name="FilterSubscriptionEndDate"
-                            Grid.Column="4"
+                            Grid.Column="3"
                             Watermark="End Date Filter..." />
                         <extended:WatermarkTextBox
                             Name="FilterSubscriptionClientName"
-                            Grid.Column="5"
+                            Grid.Column="4"
                             Watermark="Client Name Filter..." />
                         <Button
-                            Grid.Column="6"
+                            Grid.Column="5"
                             Width="17"
                             Click="ApplyFilterSubscriptionButton_Click">
                             <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Icons/checkmark.png" />
@@ -216,8 +215,8 @@
                                 Header="Subscription Type"
                                 IsReadOnly="True" />
                             <DataGridTextColumn Binding="{Binding PriceAsString}" Header="Price" />
-                            <DataGridTextColumn Binding="{Binding StartDate}" Header="Start Date" />
-                            <DataGridTextColumn Binding="{Binding EndDate}" Header="End Date" />
+                            <DataGridTextColumn Binding="{Binding StartDate, StringFormat='yyyy-MM-dd'}" Header="Start Date" />
+                            <DataGridTextColumn Binding="{Binding EndDate, StringFormat='yyyy-MM-dd'}" Header="End Date" />
                             <DataGridTextColumn
                                 Binding="{Binding ClientName}"
                                 Header="Client Name"
@@ -320,7 +319,7 @@
                         <extended:WatermarkTextBox
                             Name="FilterInstructorSpecialization"
                             Grid.Column="5"
-                            Watermark="Email Filter..." />
+                            Watermark="Specialization Filter..." />
                         <Button
                             Grid.Column="6"
                             Width="17"
@@ -382,69 +381,30 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                             <ColumnDefinition />
-                            <ColumnDefinition />
-                            <ColumnDefinition />
                             <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
-                        <extended:IntegerUpDown
-                            Name="FilterTrainingYear"
+                        <extended:WatermarkTextBox
+                            Name="FilterTrainingDate"
                             Grid.Column="0"
-                            Maximum="2100"
-                            Minimum="2000"
-                            Watermark="Year Filter..." />
-                        <extended:IntegerUpDown
-                            Name="FilterTrainingMonth"
-                            Grid.Column="1"
-                            Maximum="12"
-                            Minimum="1"
-                            Watermark="Month Filter..." />
-                        <extended:IntegerUpDown
-                            Name="FilterTrainingDay"
-                            Grid.Column="2"
-                            Maximum="31"
-                            Minimum="1"
-                            Watermark="Day Filter..." />
+                            Watermark="Date Filter..." />
                         <extended:WatermarkTextBox
                             Name="FilterTrainingTrainingType"
-                            Grid.Column="3"
+                            Grid.Column="1"
                             Watermark="Training Type Filter..." />
                         <extended:WatermarkTextBox
+                            Name="FilterTrainingPoolTextBox"
+                            Grid.Column="2"
+                            Watermark="Pool Filter..." />
+                        <extended:WatermarkTextBox
                             Name="FilterTrainingClientNames"
-                            Grid.Column="4"
+                            Grid.Column="3"
                             Watermark="Client Names Filter..." />
-                        <ComboBox
-                            Name="FilterTrainingPoolComboBox"
-                            Grid.Column="5"
-                            ItemsSource="{Binding PoolsWithNull}"
-                            SelectedIndex="0"
-                            SelectedValuePath="Id">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock>
-                                        <Run Text="{Binding PoolId}" />
-                                        <Run Text="{Binding Name}" />
-                                    </TextBlock>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                        <ComboBox
-                            Name="FilterTrainingInstructorComboBox"
-                            Grid.Column="6"
-                            ItemsSource="{Binding InstructorsWithNull}"
-                            SelectedIndex="0"
-                            SelectedValuePath="Id">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock>
-                                        <Run Text="{Binding InstructorId}" />
-                                        <Run Text="{Binding FirstName}" />
-                                        <Run Text="{Binding LastName}" />
-                                    </TextBlock>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+                        <extended:WatermarkTextBox
+                            Name="FilterTrainingInstructorTextBox"
+                            Grid.Column="4"
+                            Watermark="Instructor Filter..." />
                         <Button
-                            Grid.Column="7"
+                            Grid.Column="5"
                             Width="17"
                             Click="ApplyFilterTrainingButton_Click">
                             <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Icons/checkmark.png" />

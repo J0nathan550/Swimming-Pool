@@ -30,24 +30,11 @@ public partial class MainWindow : Window
         if (e.AddedItems.Count > 0 && e.AddedItems[0] is TabItem)
         {
             MainWindowViewModel.Clients = await Database.GetAllClients();
-
             MainWindowViewModel.Instructors = await Database.GetAllInstructors();
-            MainWindowViewModel.InstructorsWithNull = [..MainWindowViewModel.Instructors];
-            Instructor nullInstructor = new() { InstructorId = -1, FirstName = "Прибрати інструктора" };
-            MainWindowViewModel.InstructorsWithNull.Add(nullInstructor);
-
             MainWindowViewModel.Subscriptions = await Database.GetAllSubscriptions();
             MainWindowViewModel.SubscriptionTypes = await Database.GetAllSubscriptionTypes();
             MainWindowViewModel.SpecializationTypes = await Database.GetAllSpecializationTypes();
-
             MainWindowViewModel.Pools = await Database.GetAllPools();
-            MainWindowViewModel.PoolsWithNull = [..MainWindowViewModel.Pools];
-            Pool nullPool = new() { PoolId = -1, Name = "Прибрати басейн" };
-            MainWindowViewModel.PoolsWithNull.Add(nullPool);
-
-            SelectItemById(FilterTrainingInstructorComboBox, nullInstructor, i => i!.InstructorId);
-            SelectItemById(FilterTrainingPoolComboBox, nullPool, i => i!.PoolId);
-
             MainWindowViewModel.Trainings = await Database.GetAllTrainings();
         }
     }
@@ -68,42 +55,6 @@ public partial class MainWindow : Window
             Owner = this
         };
         createTrainingWindow.ShowDialog();
-    }
-
-    private async void ComboBoxClient_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (e.AddedItems.Count > 0 && e.AddedItems[0] is Client && MainWindowViewModel.SelectedTraining != null)
-        {
-            Training t = MainWindowViewModel.SelectedTraining;
-
-            await Database.UpdateTraining(
-                t.TrainingId,
-                t.Date,
-                t.TrainingType!,
-                t.PoolId,
-                t.InstructorId
-            );
-            MainWindowViewModel.Trainings = await Database.GetAllTrainings();
-        }
-    }
-
-    private async void ComboBoxInstructor_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (e.AddedItems.Count > 0 && e.AddedItems[0] is Instructor instructor && MainWindowViewModel.SelectedTraining != null)
-        {
-            Training t = MainWindowViewModel.SelectedTraining;
-            t.InstructorId = instructor.InstructorId;
-            t.InstructorName = instructor.FirstName;
-
-            await Database.UpdateTraining(
-                t.TrainingId,
-                t.Date,
-                t.TrainingType!,
-                t.PoolId,
-                t.InstructorId
-            );
-            MainWindowViewModel.Trainings = await Database.GetAllTrainings();
-        }
     }
 
     private void MenuItemInstructorSpecialization_Click(object sender, RoutedEventArgs e)
@@ -170,16 +121,12 @@ public partial class MainWindow : Window
 
     private async void ApplyFilterTrainingButton_Click(object sender, RoutedEventArgs e)
     {
-        Instructor? instructor = (Instructor)FilterTrainingInstructorComboBox.SelectedItem;
-        Pool? pool = (Pool)FilterTrainingPoolComboBox.SelectedItem;
         MainWindowViewModel.Trainings = await Database.GetTrainingFiltered(
-            FilterTrainingYear.Value,
-            FilterTrainingMonth.Value,
-            FilterTrainingDay.Value,
+            FilterTrainingDate.Text,
             FilterTrainingTrainingType.Text,
             FilterTrainingClientNames.Text,
-            pool?.PoolId ?? -1,
-            instructor?.InstructorId ?? -1
+            FilterTrainingPoolTextBox.Text,
+            FilterTrainingInstructorTextBox.Text
         );
     }
 

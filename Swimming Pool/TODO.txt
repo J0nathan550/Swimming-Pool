@@ -1,2 +1,1 @@
-Make adequate filtering by year, month, number
 Make adequate statistics (for example, top instructors by schedule) using ScottPlot (histograms)

@@ -2,9 +2,11 @@
 using MySqlConnector;
 using Swimming_Pool.Models;
 using System.Collections.ObjectModel;
-using System.Xml.Linq;
+using System.Text.RegularExpressions;
 
 namespace Swimming_Pool;
+
+
 
 public static class Database
 {
@@ -16,33 +18,28 @@ public static class Database
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
 
-        // Start the base SQL query for subscriptions
-        string sql = "SELECT * FROM subscription WHERE 1=1";
+        string sql = "SELECT * FROM subscription LEFT JOIN subscription_type ON subscription.subscription_type_id = subscription_type.subscription_type_id WHERE 1=1";
+        string price2 = "";
 
-        // Add filters based on the inputs
         if (!string.IsNullOrEmpty(subscriptionType))
-            sql += " AND subscription_type LIKE @SubscriptionType";
+            sql += " AND subscription_type.name LIKE @SubscriptionType";
         if (!string.IsNullOrEmpty(price))
-            sql += " AND price LIKE @Price";
+            sql += " AND " + GenerateNumbersComparison(ref price, ref price2, "price", "@Price", "@Price2");
         if (!string.IsNullOrEmpty(startDate))
-            sql += " AND start_date LIKE @StartDate";
+            sql += " AND " + GenerateDatesComparison(ref startDate, "start_date");
         if (!string.IsNullOrEmpty(endDate))
-            sql += " AND end_date LIKE @EndDate";
+            sql += " AND " + GenerateDatesComparison(ref endDate, "end_date");
 
-        // Filter by client name
         if (!string.IsNullOrEmpty(clientName))
         {
-            // Subquery to get client_id by client name
             sql += " AND client_id IN (SELECT client_id FROM client WHERE CONCAT(first_name, ' ', last_name) LIKE @ClientName)";
         }
 
-        // Execute the query
         IEnumerable<Subscription> subscriptions = await connection.QueryAsync<Subscription>(sql, new
         {
             SubscriptionType = $"%{subscriptionType}%",
-            Price = $"%{price}%",
-            StartDate = $"%{startDate}%",
-            EndDate = $"%{endDate}%",
+            Price = price,
+            Price2 = price2,
             ClientName = $"%{clientName}%"
         });
 
@@ -211,9 +208,35 @@ public static class Database
         return subscriptionType;
     }
 
+    static Regex ComparisonNumbersRegExEQ = new(@"^\s*=\s*([\d\.,]+)\s*");
+    static Regex ComparisonNumbersRegExNE = new(@"^\s*!=\s*([\d\.,]+)\s*");
+    static Regex ComparisonNumbersRegExLT = new(@"^\s*<\s*([\d\.,]+)\s*");
+    static Regex ComparisonNumbersRegExLE = new(@"^\s*<=\s*([\d\.,]+)\s*");
+    static Regex ComparisonNumbersRegExGT = new(@"^\s*>\s*([\d\.,]+)\s*");
+    static Regex ComparisonNumbersRegExGE = new(@"^\s*>=\s*([\d\.,]+)\s*");
+    static Regex ComparisonNumbersRegExBW = new(@"^\s*([\d\.,]+)\s*\-\s*([\d\.,]+)\s*");
+    static Regex ComparisonNumbersRegExNB = new(@"^\s*!\s*([\d\.,]+)\s*\-\s*([\d\.,]+)\s*");
+
+    static Regex ComparisonDatesRegExFULL   = new(@"(\d\d\d\d)[/\-](\d{0,1}\d)[/\-](\d{0,1}\d)");
+    static Regex ComparisonDatesRegExNoDAY  = new(@"(\d\d\d\d)[/\-](\d{0,1}\d)");
+    static Regex ComparisonDatesRegExNoMon  = new(@"(\d\d\d\d)[/\-][/\-](\d{0,1}\d)");
+    static Regex ComparisonDatesRegExNoYear = new(@"(\d{0,1}\d)[/\-](\d{0,1}\d)");
+    static Regex ComparisonDatesRegExYear4   = new(@"y\s*(\d\d\d\d)", RegexOptions.IgnoreCase);
+    static Regex ComparisonDatesRegExYear2   = new(@"y\s*(\d\d)", RegexOptions.IgnoreCase);
+    static Regex ComparisonDatesRegExMonth   = new(@"m\s*(\d{0,1}\d)", RegexOptions.IgnoreCase);
+    static Regex ComparisonDatesRegExDay     = new(@"d\s*(\d{0,1}\d)", RegexOptions.IgnoreCase);
+
+    static Regex ComparisonDatesRegExEQ = new(@"^\s*=\s*");
+    static Regex ComparisonDatesRegExNE = new(@"^\s*!=\s*");
+    static Regex ComparisonDatesRegExLT = new(@"^\s*<\s*");
+    static Regex ComparisonDatesRegExLE = new(@"^\s*<=\s*");
+    static Regex ComparisonDatesRegExGT = new(@"^\s*>\s*");
+    static Regex ComparisonDatesRegExGE = new(@"^\s*>=\s*");
+
     public static async Task<ObservableCollection<Client>> GetClientsFiltered(string firstName, string lastName, string age, string phoneNumber, string email)
     {
         bool first = true;
+        string age2 = "";
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
         string sql = "SELECT * FROM client";
         if (!string.IsNullOrEmpty(firstName))
@@ -239,13 +262,13 @@ public static class Database
         {
             if (first)
             {
-                sql += " WHERE age LIKE @Age";
+                sql += " WHERE ";
             }
             else
             {
-                sql += " AND age LIKE @Age";
+                sql += " AND ";
             }
-            age = "%" + age + "%";
+            sql += GenerateNumbersComparison(ref age, ref age2, "age", "@Age1", "@Age2");
             first = false;
         }
         if (!string.IsNullOrEmpty(phoneNumber))
@@ -274,8 +297,212 @@ public static class Database
             email = "%" + email + "%";
             first = false;
         }
-        IEnumerable<Client> clients = await connection.QueryAsync<Client>(sql, new { FirstName = firstName, LastName = lastName, Age = age, PhoneNumber = phoneNumber, EmailAddress = email });
+        IEnumerable<Client> clients = await connection.QueryAsync<Client>(sql, new { FirstName = firstName, LastName = lastName, Age1 = age, Age2 = age2, PhoneNumber = phoneNumber, EmailAddress = email });
         ObservableCollection<Client> result = [.. clients];
+        return result;
+    }
+
+    private static string GenerateNumbersComparison(ref string val1, ref string val2, string sqlField, string sqlVar1, string sqlVar2)
+    {
+        string result;
+        var match = ComparisonNumbersRegExEQ.Match(val1);
+        if (match.Success)
+        {
+            result = $"{sqlField} = {sqlVar1}";
+            val1 = match.Groups[1].Value;
+        }
+        else
+        {
+            match = ComparisonNumbersRegExNE.Match(val1);
+            if (match.Success)
+            {
+                result = $"{sqlField} != {sqlVar1}";
+                val1 = match.Groups[1].Value;
+            }
+            else
+            {
+                match = ComparisonNumbersRegExLT.Match(val1);
+                if (match.Success)
+                {
+                    result = $"{sqlField} < {sqlVar1}";
+                    val1 = match.Groups[1].Value;
+                }
+                else
+                {
+                    match = ComparisonNumbersRegExLE.Match(val1);
+                    if (match.Success)
+                    {
+                        result = $"{sqlField} <= {sqlVar1}";
+                        val1 = match.Groups[1].Value;
+                    }
+                    else
+                    {
+                        match = ComparisonNumbersRegExGT.Match(val1);
+                        if (match.Success)
+                        {
+                            result = $"{sqlField} > {sqlVar1}";
+                            val1 = match.Groups[1].Value;
+                        }
+                        else
+                        {
+                            match = ComparisonNumbersRegExGE.Match(val1);
+                            if (match.Success)
+                            {
+                                result = $"{sqlField} >= {sqlVar1}";
+                                val1 = match.Groups[1].Value;
+                            }
+                            else
+                            {
+                                match = ComparisonNumbersRegExBW.Match(val1);
+                                if (match.Success)
+                                {
+                                    result = $"({sqlField} >= {sqlVar1} AND {sqlField} <= {sqlVar2})";
+                                    val1 = match.Groups[1].Value;
+                                    val2 = match.Groups[2].Value;
+                                }
+                                else
+                                {
+                                    match = ComparisonNumbersRegExNB.Match(val1);
+                                    if (match.Success)
+                                    {
+                                        result = $"({sqlField} < {sqlVar1} OR {sqlField} > {sqlVar2})";
+                                        val1 = match.Groups[1].Value;
+                                        val2 = match.Groups[2].Value;
+                                    }
+                                    else
+                                    {
+                                        result = $"{sqlField} = {sqlVar1}";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    
+    public enum Operand { EQ, NE, LT, LE, GT, GE };
+
+    private static string GenerateDatesComparison(ref string val1, string sqlField)
+    {
+        string result = $"{sqlField} = {val1}";
+        Operand operand = Operand.EQ;
+
+        if (ComparisonDatesRegExEQ.Match(val1).Success) operand = Operand.EQ;
+        if (ComparisonDatesRegExNE.Match(val1).Success) operand = Operand.NE;
+        if (ComparisonDatesRegExLT.Match(val1).Success) operand = Operand.LT;
+        if (ComparisonDatesRegExLE.Match(val1).Success) operand = Operand.LE;
+        if (ComparisonDatesRegExGT.Match(val1).Success) operand = Operand.GT;
+        if (ComparisonDatesRegExGE.Match(val1).Success) operand = Operand.GE;
+
+        Match m = ComparisonDatesRegExFULL.Match(val1);
+        if (m.Success)
+        {
+            switch (operand)
+            {
+                case Operand.EQ: return $"YEAR({sqlField}) =  {m.Groups[1].Value} AND MONTH({sqlField}) =  {m.Groups[2].Value} AND DAY({sqlField}) =  {m.Groups[3].Value}";
+                case Operand.NE: return $"YEAR({sqlField}) != {m.Groups[1].Value} AND MONTH({sqlField}) != {m.Groups[2].Value} AND DAY({sqlField}) != {m.Groups[3].Value}";
+                case Operand.LT: return $"{sqlField} <  '{m.Groups[1].Value}/{m.Groups[2].Value}/{m.Groups[3].Value}'";
+                case Operand.LE: return $"{sqlField} <= '{m.Groups[1].Value}/{m.Groups[2].Value}/{m.Groups[3].Value}'";
+                case Operand.GT: return $"{sqlField} >  '{m.Groups[1].Value}/{m.Groups[2].Value}/{m.Groups[3].Value}'";
+                case Operand.GE: return $"{sqlField} >= '{m.Groups[1].Value}/{m.Groups[2].Value}/{m.Groups[3].Value}'";
+            }
+        }
+        m = ComparisonDatesRegExNoDAY.Match(val1);
+        if (m.Success)
+        {
+            switch (operand)
+            {
+                case Operand.EQ: return $"YEAR({sqlField}) = {m.Groups[1].Value} AND MONTH({sqlField}) = {m.Groups[2].Value}";
+                case Operand.NE: return $"YEAR({sqlField}) != {m.Groups[1].Value} AND MONTH({sqlField}) != {m.Groups[2].Value}";
+                case Operand.LT: return $"{sqlField} <  '{m.Groups[1].Value}/{m.Groups[2].Value}/01'";
+                case Operand.LE: return $"{sqlField} <= '{m.Groups[1].Value}/{m.Groups[2].Value}/01'";
+                case Operand.GT: return $"{sqlField} >  '{m.Groups[1].Value}/{m.Groups[2].Value}/01'";
+                case Operand.GE: return $"{sqlField} >= '{m.Groups[1].Value}/{m.Groups[2].Value}/01'";
+            }
+        }
+        m = ComparisonDatesRegExNoMon.Match(val1);
+        if (m.Success)
+        {
+            switch (operand)
+            {
+                case Operand.EQ: return $"YEAR({sqlField}) = {m.Groups[1].Value} AND DAY({sqlField}) = {m.Groups[2].Value}";
+                case Operand.NE: return $"YEAR({sqlField}) != {m.Groups[1].Value} AND DAY{sqlField}) != {m.Groups[2].Value}";
+                case Operand.LT: return $"YEAR({sqlField}) < {m.Groups[1].Value} AND DAY({sqlField}) < {m.Groups[2].Value}";
+                case Operand.LE: return $"YEAR({sqlField}) <= {m.Groups[1].Value} AND DAY{sqlField}) <= {m.Groups[2].Value}";
+                case Operand.GT: return $"YEAR({sqlField}) > {m.Groups[1].Value} AND DAY({sqlField}) > {m.Groups[2].Value}";
+                case Operand.GE: return $"YEAR({sqlField}) >= {m.Groups[1].Value} AND DAY{sqlField}) >= {m.Groups[2].Value}";
+            }
+        }
+        m = ComparisonDatesRegExNoYear.Match(val1);
+        if (m.Success)
+        {
+            switch (operand)
+            {
+                case Operand.EQ: return $"MONTH({sqlField}) = {m.Groups[1].Value} AND DAY({sqlField}) = {m.Groups[2].Value}";
+                case Operand.NE: return $"MONTH({sqlField}) != {m.Groups[1].Value} AND DAY{sqlField}) != {m.Groups[2].Value}";
+                case Operand.LT: return $"MONTH({sqlField}) < {m.Groups[1].Value} AND DAY({sqlField}) < {m.Groups[2].Value}";
+                case Operand.LE: return $"MONTH({sqlField}) <= {m.Groups[1].Value} AND DAY{sqlField}) <= {m.Groups[2].Value}";
+                case Operand.GT: return $"MONTH({sqlField}) > {m.Groups[1].Value} AND DAY({sqlField}) > {m.Groups[2].Value}";
+                case Operand.GE: return $"MONTH({sqlField}) >= {m.Groups[1].Value} AND DAY{sqlField}) >= {m.Groups[2].Value}";
+            }
+        }
+        m = ComparisonDatesRegExYear4.Match(val1);
+        if (m.Success)
+        {
+            switch (operand)
+            {
+                case Operand.EQ: return $"YEAR({sqlField}) = {m.Groups[1].Value}";
+                case Operand.NE: return $"YEAR({sqlField}) != {m.Groups[1].Value}";
+                case Operand.LT: return $"YEAR({sqlField}) < {m.Groups[1].Value}";
+                case Operand.LE: return $"YEAR({sqlField}) <= {m.Groups[1].Value}";
+                case Operand.GT: return $"YEAR({sqlField}) > {m.Groups[1].Value}";
+                case Operand.GE: return $"YEAR({sqlField}) >= {m.Groups[1].Value}";
+            }
+        }
+        m = ComparisonDatesRegExYear2.Match(val1);
+        if (m.Success)
+        {
+            switch (operand)
+            {
+                case Operand.EQ: return $"YEAR({sqlField}) = {"20" + m.Groups[1].Value}";
+                case Operand.NE: return $"YEAR({sqlField}) != {"20" + m.Groups[1].Value}";
+                case Operand.LT: return $"YEAR({sqlField}) < {"20" + m.Groups[1].Value}";
+                case Operand.LE: return $"YEAR({sqlField}) <= {"20" + m.Groups[1].Value}";
+                case Operand.GT: return $"YEAR({sqlField}) > {"20" + m.Groups[1].Value}";
+                case Operand.GE: return $"YEAR({sqlField}) >= {"20" + m.Groups[1].Value}";
+            }
+        }
+        m = ComparisonDatesRegExMonth.Match(val1);
+        if (m.Success)
+        {
+            switch (operand)
+            {
+                case Operand.EQ: return $"MONTH({sqlField}) = {m.Groups[1].Value}";
+                case Operand.NE: return $"MONTH({sqlField}) != {m.Groups[1].Value}";
+                case Operand.LT: return $"MONTH({sqlField}) < {m.Groups[1].Value}";
+                case Operand.LE: return $"MONTH({sqlField}) <= {m.Groups[1].Value}";
+                case Operand.GT: return $"MONTH({sqlField}) > {m.Groups[1].Value}";
+                case Operand.GE: return $"MONTH({sqlField}) >= {m.Groups[1].Value}";
+            }
+        }
+        m = ComparisonDatesRegExDay.Match(val1);
+        if (m.Success)
+        {
+            switch (operand)
+            {
+                case Operand.EQ: return $"DAY({sqlField}) = {m.Groups[1].Value}";
+                case Operand.NE: return $"DAY({sqlField}) != {m.Groups[1].Value}";
+                case Operand.LT: return $"DAY({sqlField}) < {m.Groups[1].Value}";
+                case Operand.LE: return $"DAY({sqlField}) <= {m.Groups[1].Value}";
+                case Operand.GT: return $"DAY({sqlField}) > {m.Groups[1].Value}";
+                case Operand.GE: return $"DAY({sqlField}) >= {m.Groups[1].Value}";
+            }
+        }
+
+
         return result;
     }
 
@@ -506,7 +733,7 @@ public static class Database
         return await connection.QueryFirstOrDefaultAsync<Training>(trainingSql, new { TrainingId = trainingId });
     }
 
-    public static async Task<ObservableCollection<Training>> GetTrainingFiltered(int? year, int? month, int? day, string trainingType, string clientNames, int? poolId, int? instructorId)
+    public static async Task<ObservableCollection<Training>> GetTrainingFiltered(string date, string trainingType, string clientNames, string poolName, string instructorName)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
 
@@ -517,16 +744,17 @@ public static class Database
         FROM 
             training 
         LEFT JOIN 
-            instructor ON training.instructor_id = instructor.instructor_id";
+            instructor ON training.instructor_id = instructor.instructor_id
+        LEFT JOIN 
+            pool ON training.pool_id = pool.pool_id";
 
-        // Apply filters
         List<string> conditions = [];
-        if (year.HasValue) conditions.Add("YEAR(training.date) = @Year");
-        if (month.HasValue) conditions.Add("MONTH(training.date) = @Month");
-        if (day.HasValue) conditions.Add("DAY(training.date) = @Day");
+        if (!string.IsNullOrWhiteSpace(date)) conditions.Add(
+            GenerateDatesComparison(ref date, "training.date")
+            );
         if (!string.IsNullOrWhiteSpace(trainingType)) conditions.Add("training.training_type LIKE @TrainingType");
-        if (poolId.HasValue && poolId != -1) conditions.Add("training.pool_id LIKE @PoolId");
-        if (instructorId.HasValue && instructorId != -1) conditions.Add("training.instructor_id = @InstructorId");
+        if (!string.IsNullOrWhiteSpace(poolName)) conditions.Add("pool.name LIKE @PoolName");
+        if (!string.IsNullOrWhiteSpace(instructorName)) conditions.Add("(instructor.first_name LIKE @InstructorName OR instructor.last_name LIKE @InstructorName)");
 
         if (conditions.Count > 0)
         {
@@ -537,37 +765,26 @@ public static class Database
 
         IEnumerable<Training> trainings = await connection.QueryAsync<Training>(sql, new
         {
-            Year = year,
-            Month = month,
-            Day = day,
             TrainingType = $"%{trainingType}%",
-            PoolId = poolId,
-            InstructorId = instructorId
+            InstructorName = $"%{instructorName}%",
+            PoolName = $"%{poolName}%"
         });
 
         List<Training> trainingResult = [];
 
         foreach (Training training in trainings)
         {
-            // Get client names for each training
             sql = "SELECT CONCAT(c.first_name, ' ', c.last_name) AS clientName FROM client as c LEFT JOIN client_training_enrollment AS e ON c.client_id = e.client_id WHERE e.training_id = @TrainingId";
             var clientNamesResult = await connection.QueryAsync<string>(sql, new { training.TrainingId });
-
-            // Concatenate client names
             string clientNamesConcatenated = string.Join(", ", clientNamesResult);
-
-            // Only filter by client names if provided
             bool clientNameMatch = string.IsNullOrEmpty(clientNames) || clientNamesConcatenated.Contains(clientNames, StringComparison.OrdinalIgnoreCase);
-
-            // If a match is found for client names, add to the result list
             if (clientNameMatch)
             {
                 training.ClientNames = clientNamesConcatenated;
 
-                // Get pool name
                 sql = "SELECT name FROM pool WHERE pool_id = @PoolId";
-                string? poolName = await connection.QueryFirstAsync<string>(sql, new { training.PoolId });
-                training.PoolName = poolName;
+                string? pool = await connection.QueryFirstAsync<string>(sql, new { training.PoolId });
+                training.PoolName = pool;
 
                 trainingResult.Add(training);
             }
@@ -613,7 +830,7 @@ public static class Database
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
         string sql = @"UPDATE instructor 
                            SET first_name = @FirstName, last_name = @LastName, age = @Age, 
-                               phone_number = @PhoneNumber, email_address = @EmailAddress, instructor_specializtion_id = @SpecializationId
+                               phone_number = @PhoneNumber, email_address = @EmailAddress, instructor_specialization_id = @SpecializationId
                            WHERE instructor_id = @InstructorId;";
         await connection.ExecuteAsync(sql, new { InstructorId = instructorId, FirstName = firstName, LastName = lastName, Age = age, PhoneNumber = phoneNumber, EmailAddress = emailAddress, SpecializationId = specialization_id });
     }
@@ -629,8 +846,9 @@ public static class Database
     public static async Task<ObservableCollection<Instructor>> GetInstructorsFiltered(string firstName, string lastName, string age, string phoneNumber, string email, string specialization)
     {
         bool first = true;
+        string age2 = "";
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
-        string sql = "SELECT * FROM instructor";
+        string sql = "SELECT * FROM instructor LEFT JOIN instructor_specialization ON instructor.instructor_specialization_id = instructor_specialization.instructor_specialization_id";
         if (!string.IsNullOrEmpty(firstName))
         {
             sql += " WHERE first_name LIKE @FirstName";
@@ -654,13 +872,13 @@ public static class Database
         {
             if (first)
             {
-                sql += " WHERE age LIKE @Age";
+                sql += " WHERE ";
             }
             else
             {
-                sql += " AND age LIKE @Age";
+                sql += " AND ";
             }
-            age = "%" + age + "%";
+            sql += GenerateNumbersComparison(ref age, ref age2, "age", "@Age", "@Age2");
             first = false;
         }
         if (!string.IsNullOrEmpty(phoneNumber))
@@ -693,16 +911,16 @@ public static class Database
         {
             if (first)
             {
-                sql += " WHERE specialization LIKE @Specialization";
+                sql += " WHERE instructor_specialization.specialization LIKE @Specialization";
             }
             else
             {
-                sql += " AND specialization LIKE @Specialization";
+                sql += " AND instructor_specialization.specialization LIKE @Specialization";
             }
             specialization = "%" + specialization + "%";
             first = false;
         }
-        IEnumerable<Instructor> instructors = await connection.QueryAsync<Instructor>(sql, new { FirstName = firstName, LastName = lastName, Age = age, PhoneNumber = phoneNumber, EmailAddress = email });
+        IEnumerable<Instructor> instructors = await connection.QueryAsync<Instructor>(sql, new { FirstName = firstName, LastName = lastName, Age = age, Age2 = age2, PhoneNumber = phoneNumber, EmailAddress = email, Specialization = specialization });
         foreach (Instructor instructor in instructors)
         {
             await instructor.SetSpecializationTypeNameAsync();
@@ -741,29 +959,33 @@ public static class Database
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
         string sql = "SELECT * FROM pool WHERE 1=1";
 
-        // Apply filters if the respective parameters are provided
+        string laneCount2 = "";
+        string poolLength2 = "";
+        string poolDepth2 = "";
+
         if (!string.IsNullOrEmpty(poolName))
             sql += " AND name LIKE @PoolName";
         if (!string.IsNullOrEmpty(laneCount))
-            sql += " AND lane_count LIKE @LaneCount";
+            sql += " AND " + GenerateNumbersComparison(ref laneCount, ref laneCount2, "lane_count", "@LaneCount", "@LaneCount2");
         if (!string.IsNullOrEmpty(poolLength))
-            sql += " AND length LIKE @PoolLength";
+            sql += " AND " + GenerateNumbersComparison(ref poolLength, ref poolLength2, "length", "@PoolLength", "@PoolLength2");
         if (!string.IsNullOrEmpty(poolDepth))
-            sql += " AND depth LIKE @PoolDepth";
+            sql += " AND " + GenerateNumbersComparison(ref poolDepth, ref poolDepth2, "depth", "@PoolDepth", "@PoolDepth2");
         if (!string.IsNullOrEmpty(poolAddress))
             sql += " AND address LIKE @PoolAddress";
 
-        // Execute the query with the specified parameters
         IEnumerable<Pool> pools = await connection.QueryAsync<Pool>(sql, new
         {
             PoolName = $"%{poolName}%",
-            LaneCount = $"%{laneCount}%",
-            PoolLength = $"%{poolLength}%",
-            PoolDepth = $"%{poolDepth}%",
+            LaneCount = laneCount,
+            PoolLength = poolLength,
+            PoolDepth = poolDepth,
+            LaneCount2 = laneCount2,
+            PoolLength2 = poolLength2,
+            PoolDepth2 = poolDepth2,
             PoolAddress = $"%{poolAddress}%"
         });
 
-        // Return the result as an ObservableCollection
         return new ObservableCollection<Pool>(pools);
     }
 
@@ -890,7 +1112,7 @@ public static class Database
     public static async Task CreateSpecializationType(string specialization)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
-        string sql = @"INSERT INTO instructor_specialization (text) VALUES (@Text)";
+        string sql = @"INSERT INTO instructor_specialization (specialization) VALUES (@Specialization)";
         await connection.ExecuteAsync(sql, new { Specialization = specialization });
     }
 
@@ -933,3 +1155,4 @@ public static class Database
 
     #endregion
 }
+
