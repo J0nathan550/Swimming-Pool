@@ -2,6 +2,7 @@
 using MySqlConnector;
 using Swimming_Pool.Models;
 using System.Collections.ObjectModel;
+using System.Xml.Linq;
 
 namespace Swimming_Pool;
 
@@ -277,6 +278,77 @@ public static class Database
         ObservableCollection<Client> result = [.. clients];
         return result;
     }
+
+    public static async Task<ObservableCollection<Client>> GetClientsFilteredByName(string firstNameOrLastName)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT * FROM client";
+        if (!string.IsNullOrEmpty(firstNameOrLastName))
+        {
+            sql += " WHERE first_name LIKE @FirstNameOrLastName OR last_name LIKE @FirstNameOrLastName";
+            firstNameOrLastName = "%" + firstNameOrLastName + "%";
+        }
+        IEnumerable<Client> clients = await connection.QueryAsync<Client>(sql, new { FirstNameOrLastName = firstNameOrLastName });
+        ObservableCollection<Client> result = [.. clients];
+        return result;
+    }
+
+    public static async Task<ObservableCollection<Instructor>> GetInstructorsFilteredByName(string firstNameOrLastName)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT * FROM instructor";
+        if (!string.IsNullOrEmpty(firstNameOrLastName))
+        {
+            sql += " WHERE first_name LIKE @FirstNameOrLastName OR last_name LIKE @FirstNameOrLastName";
+            firstNameOrLastName = "%" + firstNameOrLastName + "%";
+        }
+        IEnumerable<Instructor> instructors = await connection.QueryAsync<Instructor>(sql, new { FirstNameOrLastName = firstNameOrLastName });
+        ObservableCollection<Instructor> result = [.. instructors];
+        return result;
+    }
+
+    public static async Task<ObservableCollection<Pool>> GetPoolsFilteredByName(string name)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT * FROM pool";
+        if (!string.IsNullOrEmpty(name))
+        {
+            sql += " WHERE name LIKE @Name";
+            name = "%" + name + "%";
+        }
+        IEnumerable<Pool> pools = await connection.QueryAsync<Pool>(sql, new { Name = name });
+        ObservableCollection<Pool> result = [.. pools];
+        return result;
+    }
+
+    public static async Task<ObservableCollection<SubscriptionType>> GetSubscriptionTypeFilteredByName(string name)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT * FROM subscription_type";
+        if (!string.IsNullOrEmpty(name))
+        {
+            sql += " WHERE name LIKE @Name";
+            name = "%" + name + "%";
+        }
+        IEnumerable<SubscriptionType> subscriptionTypes = await connection.QueryAsync<SubscriptionType>(sql, new { Name = name });
+        ObservableCollection<SubscriptionType> result = [.. subscriptionTypes];
+        return result;
+    }
+
+    public static async Task<ObservableCollection<SpecializationType>> GetSpecializationFilteredByName(string name)
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT * FROM instructor_specialization";
+        if (!string.IsNullOrEmpty(name))
+        {
+            sql += " WHERE specialization LIKE @Name";
+            name = "%" + name + "%";
+        }
+        IEnumerable<SpecializationType> specializationTypes = await connection.QueryAsync<SpecializationType>(sql, new { Name = name });
+        ObservableCollection<SpecializationType> result = [.. specializationTypes];
+        return result;
+    }
+
     public static async Task<string> GetClientNameByIdAsync(int clientId)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);

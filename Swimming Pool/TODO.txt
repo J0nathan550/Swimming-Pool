@@ -1,3 +1,2 @@
 Make adequate filtering by year, month, number
-Make filtering, search, in dialogs so that it is convenient
 Make adequate statistics (for example, top instructors by schedule) using ScottPlot (histograms)

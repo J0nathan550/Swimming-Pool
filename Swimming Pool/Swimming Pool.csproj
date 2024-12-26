@@ -12,6 +12,7 @@
   <ItemGroup>
     <None Remove="Icons\checkmark.png" />
     <None Remove="Icons\filter.png" />
+    <None Remove="Icons\search.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +29,7 @@
     <Resource Include="Icons\filter.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Icons\search.png" />
   </ItemGroup>
 
   <ItemGroup>

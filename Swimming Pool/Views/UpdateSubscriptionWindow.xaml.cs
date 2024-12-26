@@ -115,6 +115,23 @@ public partial class UpdateSubscriptionWindow : Window
         return isOkay;
     }
 
+    private void SearchButtonClient_Click(object sender, RoutedEventArgs e)
+    {
+        if ((bool)SearchClientToggleButton.IsChecked!)
+        {
+            ClientComboBox.Visibility = Visibility.Collapsed;
+            ClientSearchTextBox.Visibility = Visibility.Visible;
+            return;
+        }
+        ClientComboBox.Visibility = Visibility.Visible;
+        ClientSearchTextBox.Visibility = Visibility.Collapsed;
+    }
+
+    private async void TextBoxClientSearch_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        CreateSubscriptionViewModel.Clients = await Database.GetClientsFilteredByName(ClientSearchTextBox.Text);
+    }
+
     private async void DeleteSubscriptionButton_Click(object sender, RoutedEventArgs e)
     {
         if (_subscription == null) return;
@@ -131,5 +148,32 @@ public partial class UpdateSubscriptionWindow : Window
             MainWindow.MainWindowViewModel.Subscriptions = await Database.GetAllSubscriptions();
             Close();
         }
+    }
+
+    private async void TextBoxSubscriptionTypeSearch_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        CreateSubscriptionViewModel.SubscriptionTypes = await Database.GetSubscriptionTypeFilteredByName(SubscriptionTypeSearchTextBox.Text);
+    }
+
+    private void SearchButtonSubscriptionType_Click(object sender, RoutedEventArgs e)
+    {
+        if ((bool)SearchSubscriptionTypeToggleButton.IsChecked!)
+        {
+            SubscriptionTypeComboBox.Visibility = Visibility.Collapsed;
+            SubscriptionTypeSearchTextBox.Visibility = Visibility.Visible;
+            return;
+        }
+        SubscriptionTypeComboBox.Visibility = Visibility.Visible;
+        SubscriptionTypeSearchTextBox.Visibility = Visibility.Collapsed;
+    }
+
+    private void ClientComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        CheckAbilityToUpdate();
+    }
+
+    private void SubscriptionTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        CheckAbilityToUpdate();
     }
 }

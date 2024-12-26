@@ -37,7 +37,7 @@ public partial class CreateInstructorWindow : Window
             return;
         }
 
-        SpecializationType? specializationType = (SpecializationType)SpecializationTypeComboBox.SelectedItem;
+        SpecializationType? specializationType = (SpecializationType)SpecializationComboBox.SelectedItem;
 
         await Database.CreateInstructor(FirstNameTextBox.Text, LastNameTextBox.Text, int.Parse(AgeTextBox.Text), PhoneNumberTextBox.Text, EmailAddressTextBox.Text, specializationType.InstructorSpecializationId);
         MainWindow.MainWindowViewModel.Instructors = await Database.GetAllInstructors();
@@ -82,7 +82,34 @@ public partial class CreateInstructorWindow : Window
             }
         }
 
+        if (SpecializationComboBox.SelectedItem == null)
+        {
+            isOkay = false;
+        }
+
         CreateInstructorButton.IsEnabled = isOkay;
         return isOkay;
+    }
+
+    private async void TextBoxSpecializationSearch_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _createUpdateSpecializationViewModel.SpecializationTypes = await Database.GetSpecializationFilteredByName(SpecializationSearchTextBox.Text);
+    }
+
+    private void SearchButtonSpecialization_Click(object sender, RoutedEventArgs e)
+    {
+        if ((bool)SearchSpecializationToggleButton.IsChecked!)
+        {
+            SpecializationComboBox.Visibility = Visibility.Collapsed;
+            SpecializationSearchTextBox.Visibility = Visibility.Visible;
+            return;
+        }
+        SpecializationComboBox.Visibility = Visibility.Visible;
+        SpecializationSearchTextBox.Visibility = Visibility.Collapsed;
+    }
+
+    private void SpecializationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        CheckAbilityToCreate();
     }
 }

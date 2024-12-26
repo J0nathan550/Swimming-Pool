@@ -8,7 +8,7 @@
     xmlns:viewmodels="clr-namespace:Swimming_Pool.ViewModels"
     Title="Swimming Pool - Creating Training"
     Width="637"
-    Height="366"
+    Height="326"
     d:DataContext="{d:DesignInstance Type=viewmodels:CreateUpdateTrainingViewModel}"
     ResizeMode="NoResize"
     WindowStartupLocation="CenterOwner"
@@ -46,7 +46,7 @@
                     Margin="10,5,0,0"
                     Text="Pool Name:" />
                 <TextBlock
-                    Grid.Row="4"
+                    Grid.Row="3"
                     Margin="10,5,0,0"
                     Text="Instructor:" />
             </Grid>
@@ -67,37 +67,81 @@
                     Grid.Row="1"
                     Margin="10,5,10,10"
                     TextChanged="TextBox_TextChanged" />
-                <ComboBox
-                    Name="PoolComboBox"
-                    Grid.Row="2"
-                    Margin="10,5,10,10"
-                    ItemsSource="{Binding Pools}"
-                    SelectedIndex="0">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock>
-                                <Run Text="{Binding PoolId}" />
-                                <Run Text="{Binding Name}" />
-                            </TextBlock>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-                <ComboBox
-                    Name="InstructorComboBox"
-                    Grid.Row="4"
-                    Margin="10,5,10,10"
-                    ItemsSource="{Binding Instructors}"
-                    SelectedIndex="0">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock>
-                                <Run Text="{Binding InstructorId}" />
-                                <Run Text="{Binding FirstName}" />
-                                <Run Text="{Binding LastName}" />
-                            </TextBlock>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                <Grid Grid.Row="2" Margin="10,5,10,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox
+                        Name="PoolComboBox"
+                        ItemsSource="{Binding Pools}"
+                        SelectedIndex="0">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding PoolId}" />
+                                    <Run Text="{Binding Name}" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox
+                        Name="PoolSearchTextBox"
+                        Grid.Column="0"
+                        Margin="0,0,1,0"
+                        TextChanged="TextBoxPoolSearch_TextChanged"
+                        Visibility="Collapsed" />
+                    <ToggleButton
+                        Name="SearchPoolToggleButton"
+                        Grid.Column="1"
+                        Width="20"
+                        Margin="1,0,0,0"
+                        Click="SearchButtonPool_Click">
+                        <Image
+                            Margin="1"
+                            RenderOptions.BitmapScalingMode="Fant"
+                            Source="/Icons/search.png" />
+                    </ToggleButton>
+                </Grid>
+                <Grid Grid.Row="3" Margin="10,5,10,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox
+                        Name="InstructorComboBox"
+                        ItemsSource="{Binding Instructors}"
+                        SelectedIndex="0"
+                        SelectionChanged="InstructorComboBox_SelectionChanged"
+                        Visibility="Visible">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding InstructorId}" />
+                                    <Run Text="{Binding FirstName}" />
+                                    <Run Text="{Binding LastName}" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox
+                        Name="InstructorSearchTextBox"
+                        Grid.Column="0"
+                        Margin="0,0,1,0"
+                        TextChanged="TextBoxInstructorSearch_TextChanged"
+                        Visibility="Collapsed" />
+                    <ToggleButton
+                        Name="SearchInstructorToggleButton"
+                        Grid.Column="1"
+                        Width="20"
+                        Margin="1,0,0,0"
+                        Click="SearchButtonInstructor_Click">
+                        <Image
+                            Margin="1"
+                            RenderOptions.BitmapScalingMode="Fant"
+                            Source="/Icons/search.png" />
+                    </ToggleButton>
+                </Grid>
             </Grid>
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
@@ -124,22 +168,45 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-                <ComboBox
-                    Name="ClientComboBox"
-                    Grid.Row="1"
-                    Margin="0,1,0,0"
-                    ItemsSource="{Binding Clients}"
-                    SelectedIndex="0">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock>
-                                <Run Text="{Binding ClientId}" />
-                                <Run Text="{Binding FirstName}" />
-                                <Run Text="{Binding LastName}" />
-                            </TextBlock>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                <Grid Grid.Row="1" Margin="0,1,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox
+                        Name="ClientComboBox"
+                        ItemsSource="{Binding Clients}"
+                        SelectedIndex="0"
+                        SelectionChanged="ClientComboBox_SelectionChanged"
+                        Visibility="Visible">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding ClientId}" />
+                                    <Run Text="{Binding FirstName}" />
+                                    <Run Text="{Binding LastName}" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox
+                        Name="ClientSearchTextBox"
+                        Grid.Column="0"
+                        Margin="0,0,1,0"
+                        TextChanged="TextBoxClientSearch_TextChanged"
+                        Visibility="Collapsed" />
+                    <ToggleButton
+                        Name="SearchClientToggleButton"
+                        Grid.Column="1"
+                        Width="20"
+                        Margin="1,0,0,0"
+                        Click="SearchButtonClient_Click">
+                        <Image
+                            Margin="1"
+                            RenderOptions.BitmapScalingMode="Fant"
+                            Source="/Icons/search.png" />
+                    </ToggleButton>
+                </Grid>
                 <Button
                     Grid.Row="2"
                     Margin="0,1,0,0"

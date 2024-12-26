@@ -86,7 +86,22 @@ public partial class UpdateTrainingWindow : Window
             isOkay = false;
         }
 
-        UpdateTrainingButton.IsEnabled = isOkay;
+        if (PoolComboBox.SelectedItem == null)
+        {
+            isOkay = false;
+        }
+
+        if (ClientComboBox?.SelectedItem == null)
+        {
+            isOkay = false;
+        }
+
+        if (InstructorComboBox.SelectedItem == null)
+        {
+            isOkay = false;
+        }
+
+        if (UpdateTrainingButton != null) UpdateTrainingButton.IsEnabled = isOkay;
         return isOkay;
     }
 
@@ -112,5 +127,71 @@ public partial class UpdateTrainingWindow : Window
             return;
         }
         MessageBox.Show($"Client - {client.FirstName} already exists and will not be added.", "Warning!", MessageBoxButton.OK, MessageBoxImage.Warning);
+    }
+
+    private void SearchButtonClient_Click(object sender, RoutedEventArgs e)
+    {
+        if ((bool)SearchClientToggleButton.IsChecked!)
+        {
+            ClientComboBox.Visibility = Visibility.Collapsed;
+            ClientSearchTextBox.Visibility = Visibility.Visible;
+            return;
+        }
+        ClientComboBox.Visibility = Visibility.Visible;
+        ClientSearchTextBox.Visibility = Visibility.Collapsed;
+    }
+
+    private async void TextBoxClientSearch_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        createUpdateTrainingViewModel.Clients = await Database.GetClientsFilteredByName(ClientSearchTextBox.Text);
+    }
+
+    private void ClientComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        CheckAbilityToUpdate();
+    }
+
+    private void SearchButtonInstructor_Click(object sender, RoutedEventArgs e)
+    {
+        if ((bool)SearchInstructorToggleButton.IsChecked!)
+        {
+            InstructorComboBox.Visibility = Visibility.Collapsed;
+            InstructorSearchTextBox.Visibility = Visibility.Visible;
+            return;
+        }
+        InstructorComboBox.Visibility = Visibility.Visible;
+        InstructorSearchTextBox.Visibility = Visibility.Collapsed;
+    }
+
+    private async void TextBoxInstructorSearch_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        createUpdateTrainingViewModel.Instructors = await Database.GetInstructorsFilteredByName(InstructorSearchTextBox.Text);
+    }
+
+    private void InstructorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        CheckAbilityToUpdate();
+    }
+
+    private void SearchButtonPool_Click(object sender, RoutedEventArgs e)
+    {
+        if ((bool)SearchPoolToggleButton.IsChecked!)
+        {
+            PoolComboBox.Visibility = Visibility.Collapsed;
+            PoolSearchTextBox.Visibility = Visibility.Visible;
+            return;
+        }
+        PoolComboBox.Visibility = Visibility.Visible;
+        PoolSearchTextBox.Visibility = Visibility.Collapsed;
+    }
+
+    private async void TextBoxPoolSearch_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        createUpdateTrainingViewModel.Pools = await Database.GetPoolsFilteredByName(PoolSearchTextBox.Text);
+    }
+
+    private void PoolComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        CheckAbilityToUpdate();
     }
 }

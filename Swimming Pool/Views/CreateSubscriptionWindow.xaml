@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:Swimming_Pool.ViewModels"
     Title="Swimming Pool - Creating Subscription"
-    Width="337"
+    Width="367"
     Height="380"
     d:DataContext="{d:DesignInstance Type=viewmodels:CreateUpdateSubscriptionViewModel}"
     ResizeMode="NoResize"
@@ -62,21 +62,43 @@
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
-                <ComboBox
-                    Name="SubscriptionTypeComboBox"
-                    Grid.Row="0"
-                    Margin="10"
-                    ItemsSource="{Binding SubscriptionTypes}"
-                    SelectedIndex="0">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock>
-                                <Run Text="{Binding SubscriptionTypeId}" />
-                                <Run Text="{Binding Name}" />
-                            </TextBlock>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                <Grid Grid.Row="0" Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox
+                        Name="SubscriptionTypeComboBox"
+                        SelectionChanged="SubscriptionTypeComboBox_SelectionChanged"
+                        ItemsSource="{Binding SubscriptionTypes}"
+                        SelectedIndex="0">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding SubscriptionTypeId}" />
+                                    <Run Text="{Binding Name}" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox
+                        Name="SubscriptionTypeSearchTextBox"
+                        Grid.Column="0"
+                        Margin="0,0,1,0"
+                        TextChanged="TextBoxSubscriptionTypeSearch_TextChanged"
+                        Visibility="Collapsed" />
+                    <ToggleButton
+                        Name="SearchSubscriptionTypeToggleButton"
+                        Grid.Column="1"
+                        Width="20"
+                        Margin="1,0,0,0"
+                        Click="SearchButtonSubscriptionType_Click">
+                        <Image
+                            Margin="1"
+                            RenderOptions.BitmapScalingMode="Fant"
+                            Source="/Icons/search.png" />
+                    </ToggleButton>
+                </Grid>
                 <TextBox
                     Name="PriceTextBox"
                     Grid.Row="1"
@@ -92,22 +114,45 @@
                     Grid.Row="3"
                     Margin="10"
                     FormatString="yyyy-MM-dd" />
-                <ComboBox
-                    Name="ClientComboBox"
-                    Grid.Row="4"
-                    Margin="10,5,10,10"
-                    ItemsSource="{Binding Clients}"
-                    SelectedIndex="0">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock>
-                                <Run Text="{Binding ClientId}" />
-                                <Run Text="{Binding FirstName}" />
-                                <Run Text="{Binding LastName}" />
-                            </TextBlock>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                <Grid Grid.Row="4" Margin="10,5,10,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox
+                        Name="ClientComboBox"
+                        ItemsSource="{Binding Clients}"
+                        SelectionChanged="ClientComboBox_SelectionChanged"
+                        SelectedIndex="0"
+                        Visibility="Visible">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding ClientId}" />
+                                    <Run Text="{Binding FirstName}" />
+                                    <Run Text="{Binding LastName}" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox
+                        Name="ClientSearchTextBox"
+                        Grid.Column="0"
+                        Margin="0,0,1,0"
+                        TextChanged="TextBoxClientSearch_TextChanged"
+                        Visibility="Collapsed" />
+                    <ToggleButton
+                        Name="SearchClientToggleButton"
+                        Grid.Column="1"
+                        Width="20"
+                        Margin="1,0,0,0"
+                        Click="SearchButtonClient_Click">
+                        <Image
+                            Margin="1"
+                            RenderOptions.BitmapScalingMode="Fant"
+                            Source="/Icons/search.png" />
+                    </ToggleButton>
+                </Grid>
             </Grid>
         </Grid>
         <Button

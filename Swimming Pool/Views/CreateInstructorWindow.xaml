@@ -93,21 +93,43 @@
                     Grid.Row="4"
                     Margin="10,5,10,10"
                     TextChanged="TextBox_TextChanged" />
-                <ComboBox
-                    Name="SpecializationTypeComboBox"
-                    Grid.Row="5"
-                    Margin="10,5,10,10"
-                    ItemsSource="{Binding SpecializationTypes}"
-                    SelectedIndex="0">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock>
-                                <Run Text="{Binding InstructorSpecializationId}" />
-                                <Run Text="{Binding Specialization}" />
-                            </TextBlock>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                <Grid Grid.Row="5" Margin="10,5,10,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox
+                        Name="SpecializationComboBox"
+                        SelectionChanged="SpecializationComboBox_SelectionChanged"
+                        ItemsSource="{Binding SpecializationTypes}"
+                        SelectedIndex="0">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding InstructorSpecializationId}" />
+                                    <Run Text="{Binding Specialization}" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox
+                        Name="SpecializationSearchTextBox"
+                        Grid.Column="0"
+                        Margin="0,0,1,0"
+                        TextChanged="TextBoxSpecializationSearch_TextChanged"
+                        Visibility="Collapsed" />
+                    <ToggleButton
+                        Name="SearchSpecializationToggleButton"
+                        Grid.Column="1"
+                        Width="20"
+                        Margin="1,0,0,0"
+                        Click="SearchButtonSpecialization_Click">
+                        <Image
+                            Margin="1"
+                            RenderOptions.BitmapScalingMode="Fant"
+                            Source="/Icons/search.png" />
+                    </ToggleButton>
+                </Grid>
             </Grid>
         </Grid>
         <Button
