@@ -6,8 +6,6 @@ using System.Text.RegularExpressions;
 
 namespace Swimming_Pool;
 
-
-
 public static class Database
 {
     public static readonly string MYSQL_CONNECTION_STRING = "Server=127.0.0.1;Database=swimming_pool;Uid=root;Pwd=;";
