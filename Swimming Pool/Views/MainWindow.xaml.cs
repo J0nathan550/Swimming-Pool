@@ -536,4 +536,13 @@ public partial class MainWindow : Window
             Process.Start("explorer.exe", openFileDialog.FolderName);
         }
     }
+
+    private void MenuItemStatistics_Click(object sender, RoutedEventArgs e)
+    {
+        StatisticsWindow statisticsWindow = new()
+        {
+            Owner = this
+        };
+        statisticsWindow.ShowDialog();
+    }
 }

@@ -1060,7 +1060,6 @@ public static class Database
         return result.ToString();
     }
 
-
     public static async Task<string> CalculateNumTrainingsPerMonth(int month)
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
@@ -1068,6 +1067,75 @@ public static class Database
         object? tmp = await connection.ExecuteScalarAsync(sql, new { Month = month });
         if (tmp is long result) return result.ToString();
         return "";
+    }
+
+    public static async Task<List<InstructorEngagement>> GetInstructorEngagement()
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "SELECT CONCAT(first_name, ' ', last_name) AS name, COUNT(training.training_id) AS count FROM" +
+            " instructor RIGHT JOIN training ON training.instructor_id = instructor.instructor_id GROUP BY instructor.instructor_id";
+        IEnumerable<InstructorEngagement>? tmp = await connection.QueryAsync<InstructorEngagement>(sql);
+        List<InstructorEngagement> result = [.. tmp];
+        return result;
+    }
+
+    public static async Task<List<InstructorEngagement>> GetInstructorClients()
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "select concat(i.first_name, '\n' , i.last_name) as Name, Count(c.client_id) AS count from Instructor as i right join training as t on t.instructor_id = i.instructor_id right join client_training_enrollment as e ON\r\ne.training_id = t.training_id left join client as c on e.client_id = c.client_id group by i.instructor_id";
+        IEnumerable<InstructorEngagement>? tmp = await connection.QueryAsync<InstructorEngagement>(sql);
+        List<InstructorEngagement> result = [.. tmp];
+        return result;
+    }
+
+    public static async Task<List<TrainingStatistics>> GetTrainingsStatistics()
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "select t.date as Date, sum(s.price) as Price, Count(c.client_id) as Clients from training as t right join client_training_enrollment as e on e.training_id = t.training_id left join client as c on c.client_id = e.client_id right join subscription as s on c.client_id = s.client_id GROUP by t.training_id";
+        IEnumerable<TrainingStatistics>? tmp = await connection.QueryAsync<TrainingStatistics>(sql);
+        List<TrainingStatistics> result = [.. tmp];
+        return result;
+    }
+
+    public static async Task<List<SubscriptionStatistics>> GetSubscriptionStatistics()
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "select st.name As SubscriptionType, Avg(s.price) as Price, count(c.client_id) as Clients from subscription_type as st right join subscription as s on s.subscription_type_id=st.subscription_type_id left join client as c on s.client_id = c.client_id group by st.subscription_type_id";
+        IEnumerable<SubscriptionStatistics>? tmp = await connection.QueryAsync<SubscriptionStatistics>(sql);
+        List<SubscriptionStatistics> result = [.. tmp];
+        return result;
+    }    
+    public static async Task<List<SpecializationStatistics>> GetAverageAgePerSpecializationStatistics()
+    {
+        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
+        string sql = "select Avg(c.age) as Age, s.specialization as Specialization, Count(c.client_id) as Clients from client as c right join client_training_enrollment as e on e.client_id = c.client_id left join training as t on t.training_id = e.training_id left join instructor as i on t.instructor_id = i.instructor_id left join instructor_specialization as s on i.instructor_specialization_id = s.instructor_specialization_id group by s.instructor_specialization_id;\r\n";
+        IEnumerable<SpecializationStatistics>? tmp = await connection.QueryAsync<SpecializationStatistics>(sql);
+        List<SpecializationStatistics> result = [.. tmp];
+        return result;
+    }
+
+    public class SubscriptionStatistics
+    {
+        public string? SubscriptionType { get; set; }
+        public float Price { get; set; }
+        public int Clients { get; set; }
+    }    
+    public class SpecializationStatistics
+    {
+        public string? Specialization { get; set; }
+        public float Age { get; set; }
+        public int Clients { get; set; }
+    }
+    public class TrainingStatistics
+    {
+        public DateTime Date { get; set; }
+        public float Price { get; set; }
+        public int Clients { get; set; }
+    }
+    public class InstructorEngagement
+    {
+        public string Name { get; set; }
+        public int Count { get; set; }
     }
 
     #endregion

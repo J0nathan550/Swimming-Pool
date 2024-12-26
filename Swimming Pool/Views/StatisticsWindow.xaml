@@ -1,0 +1,45 @@
+﻿<Window
+    x:Class="Swimming_Pool.Views.StatisticsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ScottPlot="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Swimming_Pool.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Swimming Pool - Statistics"
+    Width="800"
+    Height="450"
+    MinWidth="400"
+    MinHeight="450"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+    <Grid>
+        <TabControl SelectionChanged="TabControl_SelectionChanged">
+            <TabItem Name="InstructorEngagementTab" Header="Instructors Engagement">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <Grid Name="InstructorEngagementPanel" />
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Name="InstructorClientsTab" Header="Instructor Clients">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <Grid Name="InstructorClientsPanel" />
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Name="TrainingsTab" Header="Trainings">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <Grid Name="TrainingPanel" />
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Name="SubscriptionTab" Header="Subscriptions">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <Grid Name="SubscriptionPanel" />
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Name="SpecializationTab" Header="Age per specialization">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <Grid Name="SpecializationPanel" />
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

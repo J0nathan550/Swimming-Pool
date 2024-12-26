@@ -22,6 +22,7 @@
             <MenuItem Header="File">
                 <MenuItem Click="MenuItemApp_Click" Header="Exit" />
             </MenuItem>
+            <MenuItem Click="MenuItemStatistics_Click" Header="Statistics" />
         </Menu>
         <TabControl
             Name="TabControlView"
