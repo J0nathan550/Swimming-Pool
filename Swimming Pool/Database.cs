@@ -206,30 +206,28 @@ public static class Database
         return subscriptionType;
     }
 
-    static Regex ComparisonNumbersRegExEQ = new(@"^\s*=\s*([\d\.,]+)\s*");
-    static Regex ComparisonNumbersRegExNE = new(@"^\s*!=\s*([\d\.,]+)\s*");
-    static Regex ComparisonNumbersRegExLT = new(@"^\s*<\s*([\d\.,]+)\s*");
-    static Regex ComparisonNumbersRegExLE = new(@"^\s*<=\s*([\d\.,]+)\s*");
-    static Regex ComparisonNumbersRegExGT = new(@"^\s*>\s*([\d\.,]+)\s*");
-    static Regex ComparisonNumbersRegExGE = new(@"^\s*>=\s*([\d\.,]+)\s*");
-    static Regex ComparisonNumbersRegExBW = new(@"^\s*([\d\.,]+)\s*\-\s*([\d\.,]+)\s*");
-    static Regex ComparisonNumbersRegExNB = new(@"^\s*!\s*([\d\.,]+)\s*\-\s*([\d\.,]+)\s*");
-
-    static Regex ComparisonDatesRegExFULL   = new(@"(\d\d\d\d)[/\-](\d{0,1}\d)[/\-](\d{0,1}\d)");
-    static Regex ComparisonDatesRegExNoDAY  = new(@"(\d\d\d\d)[/\-](\d{0,1}\d)");
-    static Regex ComparisonDatesRegExNoMon  = new(@"(\d\d\d\d)[/\-][/\-](\d{0,1}\d)");
-    static Regex ComparisonDatesRegExNoYear = new(@"(\d{0,1}\d)[/\-](\d{0,1}\d)");
-    static Regex ComparisonDatesRegExYear4   = new(@"y\s*(\d\d\d\d)", RegexOptions.IgnoreCase);
-    static Regex ComparisonDatesRegExYear2   = new(@"y\s*(\d\d)", RegexOptions.IgnoreCase);
-    static Regex ComparisonDatesRegExMonth   = new(@"m\s*(\d{0,1}\d)", RegexOptions.IgnoreCase);
-    static Regex ComparisonDatesRegExDay     = new(@"d\s*(\d{0,1}\d)", RegexOptions.IgnoreCase);
-
-    static Regex ComparisonDatesRegExEQ = new(@"^\s*=\s*");
-    static Regex ComparisonDatesRegExNE = new(@"^\s*!=\s*");
-    static Regex ComparisonDatesRegExLT = new(@"^\s*<\s*");
-    static Regex ComparisonDatesRegExLE = new(@"^\s*<=\s*");
-    static Regex ComparisonDatesRegExGT = new(@"^\s*>\s*");
-    static Regex ComparisonDatesRegExGE = new(@"^\s*>=\s*");
+    private static readonly Regex ComparisonNumbersRegExEQ = new(@"^\s*=\s*([\d\.,]+)\s*");
+    private static readonly Regex ComparisonNumbersRegExNE = new(@"^\s*!=\s*([\d\.,]+)\s*");
+    private static readonly Regex ComparisonNumbersRegExLT = new(@"^\s*<\s*([\d\.,]+)\s*");
+    private static readonly Regex ComparisonNumbersRegExLE = new(@"^\s*<=\s*([\d\.,]+)\s*");
+    private static readonly Regex ComparisonNumbersRegExGT = new(@"^\s*>\s*([\d\.,]+)\s*");
+    private static readonly Regex ComparisonNumbersRegExGE = new(@"^\s*>=\s*([\d\.,]+)\s*");
+    private static readonly Regex ComparisonNumbersRegExBW = new(@"^\s*([\d\.,]+)\s*\-\s*([\d\.,]+)\s*");
+    private static readonly Regex ComparisonNumbersRegExNB = new(@"^\s*!\s*([\d\.,]+)\s*\-\s*([\d\.,]+)\s*");
+    private static readonly Regex ComparisonDatesRegExFULL   = new(@"(\d\d\d\d)[/\-](\d{0,1}\d)[/\-](\d{0,1}\d)");
+    private static readonly Regex ComparisonDatesRegExNoDAY  = new(@"(\d\d\d\d)[/\-](\d{0,1}\d)");
+    private static readonly Regex ComparisonDatesRegExNoMon  = new(@"(\d\d\d\d)[/\-][/\-](\d{0,1}\d)");
+    private static readonly Regex ComparisonDatesRegExNoYear = new(@"(\d{0,1}\d)[/\-](\d{0,1}\d)");
+    private static readonly Regex ComparisonDatesRegExYear4   = new(@"y\s*(\d\d\d\d)", RegexOptions.IgnoreCase);
+    private static readonly Regex ComparisonDatesRegExYear2   = new(@"y\s*(\d\d)", RegexOptions.IgnoreCase);
+    private static readonly Regex ComparisonDatesRegExMonth   = new(@"m\s*(\d{0,1}\d)", RegexOptions.IgnoreCase);
+    private static readonly Regex ComparisonDatesRegExDay     = new(@"d\s*(\d{0,1}\d)", RegexOptions.IgnoreCase);
+    private static readonly Regex ComparisonDatesRegExEQ = new(@"^\s*=\s*");
+    private static readonly Regex ComparisonDatesRegExNE = new(@"^\s*!=\s*");
+    private static readonly Regex ComparisonDatesRegExLT = new(@"^\s*<\s*");
+    private static readonly Regex ComparisonDatesRegExLE = new(@"^\s*<=\s*");
+    private static readonly Regex ComparisonDatesRegExGT = new(@"^\s*>\s*");
+    private static readonly Regex ComparisonDatesRegExGE = new(@"^\s*>=\s*");
 
     public static async Task<ObservableCollection<Client>> GetClientsFiltered(string firstName, string lastName, string age, string phoneNumber, string email)
     {
@@ -1028,45 +1026,6 @@ public static class Database
 
     #region Statistics
 
-    public static async Task<string> CalculateClientAgeStatistics()
-    {
-        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
-        string sql = "SELECT AVG(age) FROM client;";
-        object? tmp = await connection.ExecuteScalarAsync(sql);
-        if (tmp is decimal result) return result.ToString("F2");
-        return "";
-    }
-
-    public static async Task<string> CalculateInstructorAgeStatistics()
-    {
-        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
-        string sql = "SELECT AVG(age) FROM instructor;";
-        object? tmp = await connection.ExecuteScalarAsync(sql);
-        if (tmp is decimal result) return result.ToString("F2");
-        return "";
-    }
-
-    public static async Task<string> CalculateNumClientStatistics(int instructorId)
-    {
-        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
-        string sql = @"
-        SELECT COUNT(DISTINCT cte.client_id) 
-        FROM training t
-        JOIN client_training_enrollment cte ON t.training_id = cte.training_id
-        WHERE t.instructor_id = @InstructorId";
-        int result = await connection.ExecuteScalarAsync<int>(sql, new { InstructorId = instructorId });
-        return result.ToString();
-    }
-
-    public static async Task<string> CalculateNumTrainingsPerMonth(int month)
-    {
-        using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
-        string sql = "SELECT COUNT(training.training_id) FROM training WHERE MONTH(training.date) = @Month";
-        object? tmp = await connection.ExecuteScalarAsync(sql, new { Month = month });
-        if (tmp is long result) return result.ToString();
-        return "";
-    }
-
     public static async Task<List<InstructorEngagement>> GetInstructorEngagement()
     {
         using MySqlConnection connection = new(MYSQL_CONNECTION_STRING);
@@ -1132,7 +1091,7 @@ public static class Database
     }
     public class InstructorEngagement
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public int Count { get; set; }
     }
 
